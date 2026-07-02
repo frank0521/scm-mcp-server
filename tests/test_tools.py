@@ -649,16 +649,226 @@ class TestCommitOperation:
         assert result["error"] == "API request failed with HTTP 409"
 
 
+class TestBatch2ObjectsExtended:
+    """Test Batch 2 Objects Extended tools (read + write)."""
+
+    # Read operations
+    def test_list_applications(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_applications", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_application(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"id": "app-1"})
+        result = call("get_application", {"id": "app-1"})
+        assert result["id"] == "app-1"
+
+    def test_list_application_filters(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_application_filters", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_application_filter(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"id": "af-1"})
+        result = call("get_application_filter", {"id": "af-1"})
+        assert result["id"] == "af-1"
+
+    def test_list_schedules(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_schedules", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_schedule(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"id": "sched-1"})
+        result = call("get_schedule", {"id": "sched-1"})
+        assert result["id"] == "sched-1"
+
+    def test_list_regions(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_regions", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_region(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"id": "reg-1"})
+        result = call("get_region", {"id": "reg-1"})
+        assert result["id"] == "reg-1"
+
+    def test_list_hip_objects(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_hip_objects", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_hip_object(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"id": "hip-1"})
+        result = call("get_hip_object", {"id": "hip-1"})
+        assert result["id"] == "hip-1"
+
+    def test_list_hip_profiles(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_hip_profiles", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_hip_profile(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"id": "hpp-1"})
+        result = call("get_hip_profile", {"id": "hpp-1"})
+        assert result["id"] == "hpp-1"
+
+    def test_list_log_forwarding_profiles(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_log_forwarding_profiles", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_log_forwarding_profile(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"id": "lfp-1"})
+        result = call("get_log_forwarding_profile", {"id": "lfp-1"})
+        assert result["id"] == "lfp-1"
+
+    def test_list_http_server_profiles(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_http_server_profiles", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_http_server_profile(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"id": "hsp-1"})
+        result = call("get_http_server_profile", {"id": "hsp-1"})
+        assert result["id"] == "hsp-1"
+
+    def test_list_syslog_server_profiles(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_syslog_server_profiles", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_syslog_server_profile(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"id": "ssp-1"})
+        result = call("get_syslog_server_profile", {"id": "ssp-1"})
+        assert result["id"] == "ssp-1"
+
+    # Write operations
+    def test_create_application_filter(self, mock_rest_client):
+        mock_rest_client.return_value = (201, {"id": "af-new"})
+        result = call("create_application_filter", {"name": "test-filter", "folder": "Shared"})
+        mock_rest_client.assert_called_once_with(
+            "POST", "/config/objects/v1/application-filters",
+            params={"folder": "Shared"}, json={"name": "test-filter"},
+        )
+        assert result["id"] == "af-new"
+
+    def test_update_hip_object(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"id": "hip-1", "name": "updated"})
+        result = call("update_hip_object", {"id": "hip-1", "name": "updated", "folder": "Shared"})
+        mock_rest_client.assert_called_once_with(
+            "PUT", "/config/objects/v1/hip-objects/hip-1",
+            params={"folder": "Shared"}, json={"name": "updated"},
+        )
+
+    def test_delete_schedule(self, mock_rest_client):
+        mock_rest_client.return_value = (204, {})
+        result = call("delete_schedule", {"id": "sched-1", "folder": "Shared"})
+        mock_rest_client.assert_called_once_with(
+            "DELETE", "/config/objects/v1/schedules/sched-1",
+            params={"folder": "Shared"},
+        )
+
+    def test_create_http_server_profile(self, mock_rest_client):
+        mock_rest_client.return_value = (201, {"id": "hsp-new"})
+        result = call("create_http_server_profile", {"name": "webhook", "folder": "Shared"})
+        assert result["id"] == "hsp-new"
+
+    def test_delete_syslog_server_profile(self, mock_rest_client):
+        mock_rest_client.return_value = (204, {})
+        result = call("delete_syslog_server_profile", {"id": "ssp-1", "folder": "Shared"})
+        mock_rest_client.assert_called_once_with(
+            "DELETE", "/config/objects/v1/syslog-server-profiles/ssp-1",
+            params={"folder": "Shared"},
+        )
+
+
+class TestBatch2SecurityProfilesWrite:
+    """Test Batch 2 Security Profiles write operations."""
+
+    def test_create_anti_spyware_profile(self, mock_rest_client):
+        mock_rest_client.return_value = (201, {"id": "asp-new"})
+        result = call("create_anti_spyware_profile", {"name": "test-asp", "folder": "Shared"})
+        mock_rest_client.assert_called_once_with(
+            "POST", "/config/security/v1/anti-spyware-profiles",
+            params={"folder": "Shared"}, json={"name": "test-asp"},
+        )
+        assert result["id"] == "asp-new"
+
+    def test_update_vulnerability_protection_profile(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"id": "vpp-1"})
+        result = call("update_vulnerability_protection_profile", {"id": "vpp-1", "name": "updated", "folder": "Shared"})
+        mock_rest_client.assert_called_once_with(
+            "PUT", "/config/security/v1/vulnerability-protection-profiles/vpp-1",
+            params={"folder": "Shared"}, json={"name": "updated"},
+        )
+
+    def test_delete_url_filtering_profile(self, mock_rest_client):
+        mock_rest_client.return_value = (204, {})
+        result = call("delete_url_filtering_profile", {"id": "ufp-1", "folder": "Shared"})
+        mock_rest_client.assert_called_once_with(
+            "DELETE", "/config/security/v1/url-filtering-profiles/ufp-1",
+            params={"folder": "Shared"},
+        )
+
+    def test_create_file_blocking_profile(self, mock_rest_client):
+        mock_rest_client.return_value = (201, {"id": "fbp-new"})
+        result = call("create_file_blocking_profile", {"name": "block-exe", "folder": "Shared"})
+        assert result["id"] == "fbp-new"
+
+    def test_update_wildfire_anti_virus_profile(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"id": "wfav-1"})
+        result = call("update_wildfire_anti_virus_profile", {"id": "wfav-1", "name": "updated", "folder": "Shared"})
+        mock_rest_client.assert_called_once_with(
+            "PUT", "/config/security/v1/wildfire-anti-virus-profiles/wfav-1",
+            params={"folder": "Shared"}, json={"name": "updated"},
+        )
+
+    def test_delete_dns_security_profile(self, mock_rest_client):
+        mock_rest_client.return_value = (204, {})
+        result = call("delete_dns_security_profile", {"id": "dsp-1", "folder": "Shared"})
+        mock_rest_client.assert_called_once_with(
+            "DELETE", "/config/security/v1/dns-security-profiles/dsp-1",
+            params={"folder": "Shared"},
+        )
+
+    def test_create_decryption_profile(self, mock_rest_client):
+        mock_rest_client.return_value = (201, {"id": "dp-new"})
+        result = call("create_decryption_profile", {"name": "ssl-inspect", "folder": "Shared"})
+        assert result["id"] == "dp-new"
+
+    def test_update_zone_protection_profile(self, mock_rest_client):
+        mock_rest_client.return_value = (200, {"id": "zpp-1"})
+        result = call("update_zone_protection_profile", {"id": "zpp-1", "name": "updated", "folder": "Shared"})
+        mock_rest_client.assert_called_once_with(
+            "PUT", "/config/security/v1/zone-protection-profiles/zpp-1",
+            params={"folder": "Shared"}, json={"name": "updated"},
+        )
+
+    def test_delete_security_profile_group(self, mock_rest_client):
+        mock_rest_client.return_value = (204, {})
+        result = call("delete_security_profile_group", {"id": "spg-1", "folder": "Shared"})
+        mock_rest_client.assert_called_once_with(
+            "DELETE", "/config/security/v1/profile-groups/spg-1",
+            params={"folder": "Shared"},
+        )
+
+    def test_create_dos_protection_profile(self, mock_rest_client):
+        mock_rest_client.return_value = (201, {"id": "dpp-new"})
+        result = call("create_dos_protection_profile", {"name": "dos-limit", "folder": "Shared"})
+        assert result["id"] == "dpp-new"
+
+
 class TestMCPServerIntegration:
     """Test MCP server integration with tool registry."""
 
     def test_list_tools_count(self):
-        """list_tools() should return 98 tools (Batch 1)."""
+        """list_tools() should return 168 tools (Batch 1 + Batch 2)."""
         from scm_mcp_server.server import list_tools
         import asyncio
 
         tools = asyncio.run(list_tools())
-        assert len(tools) == 98, f"Expected 98 tools, got {len(tools)}"
+        assert len(tools) == 168, f"Expected 168 tools, got {len(tools)}"
 
     def test_list_tools_structure(self):
         """Verify Tool objects have correct structure."""
@@ -720,8 +930,8 @@ class TestMCPServerIntegration:
         assert "会将候选配置下发到真实设备" in push_tools[0].description
 
 
-class TestBatch1Completeness:
-    """Verify DESIGN.md Batch 1 tool names == registered tool names (no missing, no extra)."""
+class TestBatchCompleteness:
+    """Verify DESIGN.md Batch 1 + Batch 2 tool names == registered tool names."""
 
     BATCH1_TOOLS = {
         # 1.1 Objects Core (35 tools)
@@ -759,31 +969,65 @@ class TestBatch1Completeness:
         "list_access_policies", "create_access_policy", "delete_access_policy",
     }
 
+    BATCH2_TOOLS = {
+        # 2.1 Objects Extended (40 tools)
+        "list_applications", "get_application",
+        "list_application_filters", "get_application_filter", "create_application_filter", "update_application_filter", "delete_application_filter",
+        "list_schedules", "get_schedule", "create_schedule", "update_schedule", "delete_schedule",
+        "list_regions", "get_region", "create_region", "update_region", "delete_region",
+        "list_hip_objects", "get_hip_object", "create_hip_object", "update_hip_object", "delete_hip_object",
+        "list_hip_profiles", "get_hip_profile", "create_hip_profile", "update_hip_profile", "delete_hip_profile",
+        "list_log_forwarding_profiles", "get_log_forwarding_profile", "create_log_forwarding_profile", "update_log_forwarding_profile", "delete_log_forwarding_profile",
+        "list_http_server_profiles", "get_http_server_profile", "create_http_server_profile", "delete_http_server_profile",
+        "list_syslog_server_profiles", "get_syslog_server_profile", "create_syslog_server_profile", "delete_syslog_server_profile",
+        # 2.2 Security Profiles Write (30 tools)
+        "create_anti_spyware_profile", "update_anti_spyware_profile", "delete_anti_spyware_profile",
+        "create_vulnerability_protection_profile", "update_vulnerability_protection_profile", "delete_vulnerability_protection_profile",
+        "create_url_filtering_profile", "update_url_filtering_profile", "delete_url_filtering_profile",
+        "create_file_blocking_profile", "update_file_blocking_profile", "delete_file_blocking_profile",
+        "create_wildfire_anti_virus_profile", "update_wildfire_anti_virus_profile", "delete_wildfire_anti_virus_profile",
+        "create_dns_security_profile", "update_dns_security_profile", "delete_dns_security_profile",
+        "create_dos_protection_profile", "update_dos_protection_profile", "delete_dos_protection_profile",
+        "create_security_profile_group", "update_security_profile_group", "delete_security_profile_group",
+        "create_decryption_profile", "update_decryption_profile", "delete_decryption_profile",
+        "create_zone_protection_profile", "update_zone_protection_profile", "delete_zone_protection_profile",
+    }
+
+    ALL_TOOLS = BATCH1_TOOLS | BATCH2_TOOLS
+
     def test_batch1_count(self):
         """Batch 1 should have exactly 98 tools."""
         assert len(self.BATCH1_TOOLS) == 98, f"Expected 98, got {len(self.BATCH1_TOOLS)}"
 
+    def test_batch2_count(self):
+        """Batch 2 should have exactly 70 tools."""
+        assert len(self.BATCH2_TOOLS) == 70, f"Expected 70, got {len(self.BATCH2_TOOLS)}"
+
+    def test_total_count(self):
+        """Total should be 168 tools."""
+        assert len(self.ALL_TOOLS) == 168, f"Expected 168, got {len(self.ALL_TOOLS)}"
+
     def test_no_missing_tools(self):
-        """All DESIGN.md Batch 1 tools must be registered."""
+        """All DESIGN.md tools must be registered."""
         from scm_mcp_server.server import list_tools
         import asyncio
 
         tools = asyncio.run(list_tools())
         registered = {t.name for t in tools}
 
-        missing = self.BATCH1_TOOLS - registered
+        missing = self.ALL_TOOLS - registered
         assert not missing, f"Missing from registry: {sorted(missing)}"
 
     def test_no_extra_tools(self):
-        """No extra tools beyond DESIGN.md Batch 1 should be registered."""
+        """No extra tools beyond DESIGN.md should be registered."""
         from scm_mcp_server.server import list_tools
         import asyncio
 
         tools = asyncio.run(list_tools())
         registered = {t.name for t in tools}
 
-        extra = registered - self.BATCH1_TOOLS
-        assert not extra, f"Extra tools not in Batch 1: {sorted(extra)}"
+        extra = registered - self.ALL_TOOLS
+        assert not extra, f"Extra tools not in DESIGN.md: {sorted(extra)}"
 
 
 class TestWriteOperations:
