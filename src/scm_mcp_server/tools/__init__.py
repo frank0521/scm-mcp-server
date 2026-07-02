@@ -145,11 +145,28 @@ _DELETE_TOOLS: dict[str, tuple[str, tuple[str, ...], tuple[str, ...]]] = {
     "delete_access_policy": ("/iam/v1/access-policies/{id}", ("id",), ()),
 }
 
-# Move operations (special case for rules): tool_name -> (path_template, tuple_of_path_param_keys)
+# Move operations: tool_name -> (path_template, body_keys)
+# Path always requires {id}; body fields from OpenAPI rule-based-move schema
 _MOVE_TOOLS: dict[str, tuple[str, tuple[str, ...]]] = {
-    "move_security_rule": ("/config/security/v1/security-rules/{id}:move", ("id",)),
-    "move_decryption_rule": ("/config/security/v1/decryption-rules/{id}:move", ("id",)),
-    "move_app_override_rule": ("/config/security/v1/app-override-rules/{id}:move", ("id",)),
+    "move_security_rule": ("/config/security/v1/security-rules/{id}:move", ("destination", "rulebase", "destination_rule")),
+    "move_decryption_rule": ("/config/security/v1/decryption-rules/{id}:move", ("destination", "rulebase", "destination_rule")),
+    "move_app_override_rule": ("/config/security/v1/app-override-rules/{id}:move", ("destination", "rulebase", "destination_rule")),
+}
+
+# Push operations: tool_name -> (path, body_keys)
+# Body fields from config-operations-march.yaml PushCandidateConfigVersions schema
+_PUSH_TOOLS: dict[str, tuple[str, tuple[str, ...]]] = {
+    "push_candidate_config": ("/config/operations/v1/config-versions:push", ("admin", "description", "folder", "devices")),
+}
+
+# Load config: POST with version in body (from config-operations-march.yaml load-config schema)
+_LOAD_TOOLS: dict[str, tuple[str, tuple[str, ...]]] = {
+    "load_candidate_config": ("/config/operations/v1/config-versions:load", ("version",)),
+}
+
+# Commit config: POST with no body (endpoint from DESIGN.md)
+_COMMIT_TOOLS: dict[str, tuple[str, tuple[str, ...]]] = {
+    "commit_config": ("/config/operations/v1/jobs:commit", ()),
 }
 
 
@@ -201,6 +218,12 @@ def call(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         return _handle_delete(name, arguments)
     elif name in _MOVE_TOOLS:
         return _handle_move(name, arguments)
+    elif name in _PUSH_TOOLS:
+        return _handle_push(name, arguments)
+    elif name in _LOAD_TOOLS:
+        return _handle_load(name, arguments)
+    elif name in _COMMIT_TOOLS:
+        return _handle_commit(name, arguments)
     else:
         raise NotImplementedError(
             f"Tool '{name}' not implemented. "
@@ -374,28 +397,85 @@ def _handle_move(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
 
     Args:
         name: Tool name from _MOVE_TOOLS
-        arguments: Must include 'id' + move directive (e.g., 'destination', 'where')
+        arguments: Must include 'id' + body fields (destination, rulebase, destination_rule)
 
     Returns:
         API response or error dict.
     """
-    path_template, path_param_keys = _MOVE_TOOLS[name]
+    path_template, body_keys = _MOVE_TOOLS[name]
 
-    # Extract path parameter
-    path_param_name = path_param_keys[0]
-    if path_param_name not in arguments:
+    if "id" not in arguments:
         return {
-            "error": f"Missing required parameter: {path_param_name}",
+            "error": "Missing required parameter: id",
             "status": 400,
             "body": None,
         }
 
-    path_param_value = arguments[path_param_name]
-    path = path_template.replace(f"{{{path_param_name}}}", str(path_param_value))
+    path = path_template.replace("{id}", str(arguments["id"]))
+    body = _pick(arguments, body_keys)
 
-    # Build request body (everything except path param)
-    reserved_keys = set(path_param_keys)
-    body = {key: value for key, value in arguments.items() if key not in reserved_keys and value is not None}
+    status, response = rest_client.request("POST", path, params={}, json=body)
+
+    if 200 <= status < 300:
+        return response  # type: ignore
+    else:
+        return {"error": f"API request failed with HTTP {status}", "status": status, "body": response}
+
+
+def _handle_push(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+    """Handle push operations (POST config push).
+
+    Args:
+        name: Tool name from _PUSH_TOOLS
+        arguments: Body fields (admin, description, folder, devices)
+
+    Returns:
+        API response or error dict.
+    """
+    path, body_keys = _PUSH_TOOLS[name]
+    body = _pick(arguments, body_keys)
+
+    status, response = rest_client.request("POST", path, params={}, json=body)
+
+    if 200 <= status < 300:
+        return response  # type: ignore
+    else:
+        return {"error": f"API request failed with HTTP {status}", "status": status, "body": response}
+
+
+def _handle_load(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+    """Handle load config version operations.
+
+    Args:
+        name: Tool name from _LOAD_TOOLS
+        arguments: Body fields (version)
+
+    Returns:
+        API response or error dict.
+    """
+    path, body_keys = _LOAD_TOOLS[name]
+    body = _pick(arguments, body_keys)
+
+    status, response = rest_client.request("POST", path, params={}, json=body)
+
+    if 200 <= status < 300:
+        return response  # type: ignore
+    else:
+        return {"error": f"API request failed with HTTP {status}", "status": status, "body": response}
+
+
+def _handle_commit(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+    """Handle commit operations.
+
+    Args:
+        name: Tool name from _COMMIT_TOOLS
+        arguments: Body fields (currently empty for commit)
+
+    Returns:
+        API response or error dict.
+    """
+    path, body_keys = _COMMIT_TOOLS[name]
+    body = _pick(arguments, body_keys)
 
     status, response = rest_client.request("POST", path, params={}, json=body)
 

@@ -136,3 +136,144 @@ def get_by_id_schema(
         ]
 
     return schema
+
+
+def create_schema(*, has_container: bool = True) -> dict[str, Any]:
+    """Generate input schema for create operations (POST)."""
+    schema: dict[str, Any] = {
+        "type": "object",
+        "properties": {
+            "folder": FOLDER_PARAM,
+            "snippet": SNIPPET_PARAM,
+            "device": DEVICE_PARAM,
+        },
+        "additionalProperties": True,
+    }
+    if has_container:
+        schema["oneOf"] = [
+            {"required": ["folder"]},
+            {"required": ["snippet"]},
+            {"required": ["device"]},
+        ]
+    return schema
+
+
+def update_schema(*, has_container: bool = True) -> dict[str, Any]:
+    """Generate input schema for update operations (PUT)."""
+    schema: dict[str, Any] = {
+        "type": "object",
+        "properties": {
+            "id": ID_PARAM,
+            "folder": FOLDER_PARAM,
+            "snippet": SNIPPET_PARAM,
+            "device": DEVICE_PARAM,
+        },
+        "required": ["id"],
+        "additionalProperties": True,
+    }
+    if has_container:
+        schema["oneOf"] = [
+            {"required": ["id", "folder"]},
+            {"required": ["id", "snippet"]},
+            {"required": ["id", "device"]},
+        ]
+    return schema
+
+
+def delete_schema(*, has_container: bool = True) -> dict[str, Any]:
+    """Generate input schema for delete operations (DELETE)."""
+    schema: dict[str, Any] = {
+        "type": "object",
+        "properties": {
+            "id": ID_PARAM,
+            "folder": FOLDER_PARAM,
+            "snippet": SNIPPET_PARAM,
+            "device": DEVICE_PARAM,
+        },
+        "required": ["id"],
+    }
+    if has_container:
+        schema["oneOf"] = [
+            {"required": ["id", "folder"]},
+            {"required": ["id", "snippet"]},
+            {"required": ["id", "device"]},
+        ]
+    return schema
+
+
+def move_schema() -> dict[str, Any]:
+    """Generate input schema for move operations (rule reordering)."""
+    return {
+        "type": "object",
+        "properties": {
+            "id": {
+                "type": "string",
+                "description": "UUID of the rule to move.",
+            },
+            "destination": {
+                "type": "string",
+                "enum": ["top", "bottom", "before", "after"],
+                "description": "Where to move the rule.",
+            },
+            "rulebase": {
+                "type": "string",
+                "enum": ["pre", "post"],
+                "description": "Which rulebase the rule belongs to.",
+            },
+            "destination_rule": {
+                "type": "string",
+                "description": "UUID of the pivot rule (required when destination is 'before' or 'after').",
+            },
+        },
+        "required": ["id", "destination", "rulebase"],
+    }
+
+
+def push_schema() -> dict[str, Any]:
+    """Generate input schema for push candidate config."""
+    return {
+        "type": "object",
+        "properties": {
+            "admin": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "List of administrators and/or service accounts.",
+            },
+            "description": {
+                "type": "string",
+                "description": "A description of the changes being pushed.",
+            },
+            "folder": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Target folders for the configuration push.",
+            },
+            "devices": {
+                "type": "array",
+                "items": {"type": "number"},
+                "description": "Target device serial numbers for the configuration push.",
+            },
+        },
+    }
+
+
+def load_schema() -> dict[str, Any]:
+    """Generate input schema for load config version."""
+    return {
+        "type": "object",
+        "properties": {
+            "version": {
+                "type": "integer",
+                "description": "Configuration version number to load as candidate.",
+            },
+        },
+        "required": ["version"],
+    }
+
+
+def commit_schema() -> dict[str, Any]:
+    """Generate input schema for commit config."""
+    return {
+        "type": "object",
+        "properties": {},
+    }

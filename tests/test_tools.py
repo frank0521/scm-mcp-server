@@ -447,16 +447,218 @@ class TestIAMTools:
         assert "data" in result
 
 
+class TestMoveOperations:
+    """Test move operations with body_keys-based routing."""
+
+    def test_move_security_rule_success(self, mock_rest_client):
+        """move_security_rule: POST with correct path and body fields."""
+        mock_rest_client.return_value = (200, {"id": "rule-1"})
+
+        result = call("move_security_rule", {
+            "id": "rule-1",
+            "destination": "before",
+            "rulebase": "pre",
+            "destination_rule": "rule-2",
+        })
+
+        mock_rest_client.assert_called_once_with(
+            "POST",
+            "/config/security/v1/security-rules/rule-1:move",
+            params={},
+            json={"destination": "before", "rulebase": "pre", "destination_rule": "rule-2"},
+        )
+        assert result["id"] == "rule-1"
+
+    def test_move_security_rule_top(self, mock_rest_client):
+        """move_security_rule: destination=top, no destination_rule needed."""
+        mock_rest_client.return_value = (200, {"id": "rule-1"})
+
+        result = call("move_security_rule", {
+            "id": "rule-1",
+            "destination": "top",
+            "rulebase": "pre",
+        })
+
+        mock_rest_client.assert_called_once_with(
+            "POST",
+            "/config/security/v1/security-rules/rule-1:move",
+            params={},
+            json={"destination": "top", "rulebase": "pre"},
+        )
+
+    def test_move_security_rule_missing_id(self, mock_rest_client):
+        """move_security_rule: missing id returns 400."""
+        result = call("move_security_rule", {"destination": "top", "rulebase": "pre"})
+
+        assert result["error"] == "Missing required parameter: id"
+        assert result["status"] == 400
+        mock_rest_client.assert_not_called()
+
+    def test_move_decryption_rule_success(self, mock_rest_client):
+        """move_decryption_rule: correct path."""
+        mock_rest_client.return_value = (200, {"id": "dec-1"})
+
+        result = call("move_decryption_rule", {
+            "id": "dec-1",
+            "destination": "after",
+            "rulebase": "post",
+            "destination_rule": "dec-2",
+        })
+
+        mock_rest_client.assert_called_once_with(
+            "POST",
+            "/config/security/v1/decryption-rules/dec-1:move",
+            params={},
+            json={"destination": "after", "rulebase": "post", "destination_rule": "dec-2"},
+        )
+
+    def test_move_app_override_rule_success(self, mock_rest_client):
+        """move_app_override_rule: correct path."""
+        mock_rest_client.return_value = (200, {"id": "ao-1"})
+
+        result = call("move_app_override_rule", {
+            "id": "ao-1",
+            "destination": "bottom",
+            "rulebase": "pre",
+        })
+
+        mock_rest_client.assert_called_once_with(
+            "POST",
+            "/config/security/v1/app-override-rules/ao-1:move",
+            params={},
+            json={"destination": "bottom", "rulebase": "pre"},
+        )
+
+    def test_move_error_response(self, mock_rest_client):
+        """move operation: non-2xx response."""
+        mock_rest_client.return_value = (409, {"message": "Conflict"})
+
+        result = call("move_security_rule", {
+            "id": "rule-1",
+            "destination": "top",
+            "rulebase": "pre",
+        })
+
+        assert result["error"] == "API request failed with HTTP 409"
+        assert result["status"] == 409
+
+
+class TestPushOperation:
+    """Test push_candidate_config."""
+
+    def test_push_candidate_config_success(self, mock_rest_client):
+        """push_candidate_config: POST with body fields from YAML schema."""
+        mock_rest_client.return_value = (201, {"job_id": "job-999"})
+
+        result = call("push_candidate_config", {
+            "folder": ["Shared", "Mobile Users"],
+            "description": "Deploy new rules",
+            "admin": ["admin@example.com"],
+        })
+
+        mock_rest_client.assert_called_once_with(
+            "POST",
+            "/config/operations/v1/config-versions:push",
+            params={},
+            json={
+                "folder": ["Shared", "Mobile Users"],
+                "description": "Deploy new rules",
+                "admin": ["admin@example.com"],
+            },
+        )
+        assert result["job_id"] == "job-999"
+
+    def test_push_candidate_config_devices(self, mock_rest_client):
+        """push_candidate_config: push to specific devices."""
+        mock_rest_client.return_value = (201, {"job_id": "job-100"})
+
+        result = call("push_candidate_config", {
+            "devices": [7951000388704, 7951000388707],
+            "description": "Push to devices",
+        })
+
+        mock_rest_client.assert_called_once_with(
+            "POST",
+            "/config/operations/v1/config-versions:push",
+            params={},
+            json={
+                "devices": [7951000388704, 7951000388707],
+                "description": "Push to devices",
+            },
+        )
+
+    def test_push_candidate_config_error(self, mock_rest_client):
+        """push_candidate_config: non-2xx response."""
+        mock_rest_client.return_value = (400, {"message": "No folders specified"})
+
+        result = call("push_candidate_config", {})
+
+        assert result["error"] == "API request failed with HTTP 400"
+        assert result["status"] == 400
+
+
+class TestLoadOperation:
+    """Test load_candidate_config."""
+
+    def test_load_candidate_config_success(self, mock_rest_client):
+        """load_candidate_config: POST with version in body."""
+        mock_rest_client.return_value = (201, {"success": True})
+
+        result = call("load_candidate_config", {"version": 42})
+
+        mock_rest_client.assert_called_once_with(
+            "POST",
+            "/config/operations/v1/config-versions:load",
+            params={},
+            json={"version": 42},
+        )
+        assert result["success"] is True
+
+    def test_load_candidate_config_error(self, mock_rest_client):
+        """load_candidate_config: non-2xx response."""
+        mock_rest_client.return_value = (404, {"message": "Version not found"})
+
+        result = call("load_candidate_config", {"version": 999})
+
+        assert result["error"] == "API request failed with HTTP 404"
+
+
+class TestCommitOperation:
+    """Test commit_config."""
+
+    def test_commit_config_success(self, mock_rest_client):
+        """commit_config: POST with empty body."""
+        mock_rest_client.return_value = (201, {"job_id": "job-500"})
+
+        result = call("commit_config", {})
+
+        mock_rest_client.assert_called_once_with(
+            "POST",
+            "/config/operations/v1/jobs:commit",
+            params={},
+            json={},
+        )
+        assert result["job_id"] == "job-500"
+
+    def test_commit_config_error(self, mock_rest_client):
+        """commit_config: non-2xx response."""
+        mock_rest_client.return_value = (409, {"message": "Pending changes conflict"})
+
+        result = call("commit_config", {})
+
+        assert result["error"] == "API request failed with HTTP 409"
+
+
 class TestMCPServerIntegration:
     """Test MCP server integration with tool registry."""
 
     def test_list_tools_count(self):
-        """list_tools() should return 52 tools."""
+        """list_tools() should return 98 tools (Batch 1)."""
         from scm_mcp_server.server import list_tools
         import asyncio
 
         tools = asyncio.run(list_tools())
-        assert len(tools) == 52, f"Expected 52 tools, got {len(tools)}"
+        assert len(tools) == 98, f"Expected 98 tools, got {len(tools)}"
 
     def test_list_tools_structure(self):
         """Verify Tool objects have correct structure."""
@@ -473,21 +675,115 @@ class TestMCPServerIntegration:
         assert "properties" in sample_tool.inputSchema
 
     def test_list_tools_coverage(self):
-        """Verify all implemented tools appear in list_tools()."""
+        """Verify all routing-table tools appear in list_tools()."""
         from scm_mcp_server.server import list_tools
-        from scm_mcp_server.tools import _LIST_TOOLS, _GET_BY_ID_TOOLS
+        from scm_mcp_server.tools import (
+            _LIST_TOOLS, _GET_BY_ID_TOOLS, _CREATE_TOOLS,
+            _UPDATE_TOOLS, _DELETE_TOOLS, _MOVE_TOOLS,
+            _PUSH_TOOLS, _LOAD_TOOLS, _COMMIT_TOOLS,
+        )
         import asyncio
 
         tools = asyncio.run(list_tools())
         tool_names = {t.name for t in tools}
 
-        # All list tools should be present
-        for name in _LIST_TOOLS.keys():
-            assert name in tool_names, f"Missing list tool: {name}"
+        all_tables = [
+            _LIST_TOOLS, _GET_BY_ID_TOOLS, _CREATE_TOOLS,
+            _UPDATE_TOOLS, _DELETE_TOOLS, _MOVE_TOOLS,
+            _PUSH_TOOLS, _LOAD_TOOLS, _COMMIT_TOOLS,
+        ]
+        for table in all_tables:
+            for name in table.keys():
+                assert name in tool_names, f"Missing tool: {name}"
 
-        # All get-by-ID tools should be present
-        for name in _GET_BY_ID_TOOLS.keys():
-            assert name in tool_names, f"Missing get-by-ID tool: {name}"
+    def test_move_tool_descriptions(self):
+        """Move tools must warn about rule order change."""
+        from scm_mcp_server.server import list_tools
+        import asyncio
+
+        tools = asyncio.run(list_tools())
+        move_tools = [t for t in tools if t.name.startswith("move_")]
+
+        for tool in move_tools:
+            assert "会改变规则顺序" in tool.description, f"{tool.name} missing warning"
+
+    def test_push_tool_description(self):
+        """push_candidate_config must warn about high-risk operation."""
+        from scm_mcp_server.server import list_tools
+        import asyncio
+
+        tools = asyncio.run(list_tools())
+        push_tools = [t for t in tools if t.name == "push_candidate_config"]
+
+        assert len(push_tools) == 1
+        assert "高风险写操作" in push_tools[0].description
+        assert "会将候选配置下发到真实设备" in push_tools[0].description
+
+
+class TestBatch1Completeness:
+    """Verify DESIGN.md Batch 1 tool names == registered tool names (no missing, no extra)."""
+
+    BATCH1_TOOLS = {
+        # 1.1 Objects Core (35 tools)
+        "list_addresses", "get_address", "create_address", "update_address", "delete_address",
+        "list_address_groups", "get_address_group", "create_address_group", "update_address_group", "delete_address_group",
+        "list_services", "get_service", "create_service", "update_service", "delete_service",
+        "list_service_groups", "get_service_group", "create_service_group", "update_service_group", "delete_service_group",
+        "list_tags", "get_tag", "create_tag", "update_tag", "delete_tag",
+        "list_application_groups", "get_application_group", "create_application_group", "update_application_group", "delete_application_group",
+        "list_external_dynamic_lists", "get_external_dynamic_list", "create_external_dynamic_list", "update_external_dynamic_list", "delete_external_dynamic_list",
+        # 1.2 Security Rules (23 tools)
+        "list_security_rules", "get_security_rule", "create_security_rule", "update_security_rule", "delete_security_rule", "move_security_rule",
+        "list_decryption_rules", "get_decryption_rule", "create_decryption_rule", "update_decryption_rule", "delete_decryption_rule", "move_decryption_rule",
+        "list_app_override_rules", "get_app_override_rule", "create_app_override_rule", "update_app_override_rule", "delete_app_override_rule", "move_app_override_rule",
+        "list_dos_protection_rules", "get_dos_protection_rule", "create_dos_protection_rule", "update_dos_protection_rule", "delete_dos_protection_rule",
+        # 1.3 Security Profiles Read-Only (20 tools)
+        "list_anti_spyware_profiles", "get_anti_spyware_profile",
+        "list_vulnerability_protection_profiles", "get_vulnerability_protection_profile",
+        "list_url_filtering_profiles", "get_url_filtering_profile",
+        "list_file_blocking_profiles", "get_file_blocking_profile",
+        "list_wildfire_anti_virus_profiles", "get_wildfire_anti_virus_profile",
+        "list_dns_security_profiles", "get_dns_security_profile",
+        "list_dos_protection_profiles", "get_dos_protection_profile",
+        "list_security_profile_groups", "get_security_profile_group",
+        "list_decryption_profiles", "get_decryption_profile",
+        "list_zone_protection_profiles", "get_zone_protection_profile",
+        # 1.4 Operations (8 tools)
+        "list_jobs", "get_job",
+        "list_config_versions", "get_config_version",
+        "push_candidate_config", "load_candidate_config",
+        "commit_config", "get_running_config",
+        # 1.5 IAM (12 tools)
+        "list_service_accounts", "get_service_account", "create_service_account", "update_service_account", "delete_service_account",
+        "list_roles", "get_role", "create_role", "delete_role",
+        "list_access_policies", "create_access_policy", "delete_access_policy",
+    }
+
+    def test_batch1_count(self):
+        """Batch 1 should have exactly 98 tools."""
+        assert len(self.BATCH1_TOOLS) == 98, f"Expected 98, got {len(self.BATCH1_TOOLS)}"
+
+    def test_no_missing_tools(self):
+        """All DESIGN.md Batch 1 tools must be registered."""
+        from scm_mcp_server.server import list_tools
+        import asyncio
+
+        tools = asyncio.run(list_tools())
+        registered = {t.name for t in tools}
+
+        missing = self.BATCH1_TOOLS - registered
+        assert not missing, f"Missing from registry: {sorted(missing)}"
+
+    def test_no_extra_tools(self):
+        """No extra tools beyond DESIGN.md Batch 1 should be registered."""
+        from scm_mcp_server.server import list_tools
+        import asyncio
+
+        tools = asyncio.run(list_tools())
+        registered = {t.name for t in tools}
+
+        extra = registered - self.BATCH1_TOOLS
+        assert not extra, f"Extra tools not in Batch 1: {sorted(extra)}"
 
 
 class TestWriteOperations:
@@ -615,35 +911,6 @@ class TestWriteOperations:
             "/iam/v1/service-accounts/sa-123",
             params={},
         )
-
-    # ========================================================================
-    # Move operations
-    # ========================================================================
-
-    def test_move_security_rule_success(self, mock_rest_client):
-        """move_security_rule: success case."""
-        mock_rest_client.return_value = (200, {"id": "rule-123", "position": "after-rule-456"})
-
-        result = call("move_security_rule", {
-            "id": "rule-123",
-            "destination": "after",
-            "rulebase": "default",
-            "destination_rule": "rule-456",
-        })
-
-        mock_rest_client.assert_called_once_with(
-            "POST",
-            "/config/security/v1/security-rules/rule-123:move",
-            params={},
-            json={"destination": "after", "rulebase": "default", "destination_rule": "rule-456"},
-        )
-        assert result["id"] == "rule-123"
-
-    def test_move_decryption_rule(self, mock_rest_client):
-        """move_decryption_rule: smoke test."""
-        mock_rest_client.return_value = (200, {"id": "dec-1"})
-        result = call("move_decryption_rule", {"id": "dec-1", "destination": "top"})
-        assert result["id"] == "dec-1"
 
     # ========================================================================
     # Error handling

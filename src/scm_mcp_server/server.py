@@ -23,17 +23,20 @@ async def list_tools() -> list[Tool]:
     Returns:
         List of Tool objects generated from routing tables.
     """
-    from .tools import _LIST_TOOLS, _GET_BY_ID_TOOLS
-    from .tools.schemas import list_schema, get_by_id_schema
+    from .tools import (
+        _LIST_TOOLS, _GET_BY_ID_TOOLS, _CREATE_TOOLS, _UPDATE_TOOLS,
+        _DELETE_TOOLS, _MOVE_TOOLS, _PUSH_TOOLS, _LOAD_TOOLS, _COMMIT_TOOLS,
+    )
+    from .tools.schemas import (
+        list_schema, get_by_id_schema, move_schema, push_schema,
+        load_schema, commit_schema, create_schema, update_schema, delete_schema,
+    )
 
     tools_list: list[Tool] = []
 
     # Generate list tools
     for name, (path, param_keys) in _LIST_TOOLS.items():
-        # Determine if this tool requires container param (folder/snippet/device)
-        # For now, assume all config/security tools require it, ops/iam do not
         requires_container = path.startswith("/config/")
-
         tools_list.append(
             Tool(
                 name=name,
@@ -44,10 +47,8 @@ async def list_tools() -> list[Tool]:
 
     # Generate get-by-ID tools
     for name, (path_template, param_keys) in _GET_BY_ID_TOOLS.items():
-        # Determine ID param name (first in param_keys)
         id_param_name = param_keys[0]
         requires_container = path_template.startswith("/config/")
-
         tools_list.append(
             Tool(
                 name=name,
@@ -55,6 +56,76 @@ async def list_tools() -> list[Tool]:
                 inputSchema=get_by_id_schema(
                     id_param_name=id_param_name, required_container=requires_container
                 ),
+            )
+        )
+
+    # Generate create tools
+    for name, (path, body_param_keys, query_param_keys) in _CREATE_TOOLS.items():
+        tools_list.append(
+            Tool(
+                name=name,
+                description=f"⚠️ 写操作 Create resource at {path}",
+                inputSchema=create_schema(has_container="folder" in query_param_keys),
+            )
+        )
+
+    # Generate update tools
+    for name, (path_template, path_param_keys, query_param_keys) in _UPDATE_TOOLS.items():
+        tools_list.append(
+            Tool(
+                name=name,
+                description=f"⚠️ 写操作 Update resource at {path_template}",
+                inputSchema=update_schema(has_container="folder" in query_param_keys),
+            )
+        )
+
+    # Generate delete tools
+    for name, (path_template, path_param_keys, query_param_keys) in _DELETE_TOOLS.items():
+        tools_list.append(
+            Tool(
+                name=name,
+                description=f"⚠️ 写操作 Delete resource at {path_template}",
+                inputSchema=delete_schema(has_container="folder" in query_param_keys),
+            )
+        )
+
+    # Generate move tools
+    for name, (path_template, body_keys) in _MOVE_TOOLS.items():
+        tools_list.append(
+            Tool(
+                name=name,
+                description=f"⚠️ 写操作，会改变规则顺序 Move rule at {path_template}",
+                inputSchema=move_schema(),
+            )
+        )
+
+    # Generate push tools
+    for name, (path, body_keys) in _PUSH_TOOLS.items():
+        tools_list.append(
+            Tool(
+                name=name,
+                description="⚠️ 高风险写操作：会将候选配置下发到真实设备 Push candidate configuration",
+                inputSchema=push_schema(),
+            )
+        )
+
+    # Generate load tools
+    for name, (path, body_keys) in _LOAD_TOOLS.items():
+        tools_list.append(
+            Tool(
+                name=name,
+                description=f"⚠️ 写操作 Load config version as candidate at {path}",
+                inputSchema=load_schema(),
+            )
+        )
+
+    # Generate commit tools
+    for name, (path, body_keys) in _COMMIT_TOOLS.items():
+        tools_list.append(
+            Tool(
+                name=name,
+                description=f"⚠️ 写操作 Commit candidate to running config at {path}",
+                inputSchema=commit_schema(),
             )
         )
 
