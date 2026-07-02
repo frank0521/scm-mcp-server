@@ -445,3 +445,46 @@ class TestIAMTools:
         mock_rest_client.return_value = (200, {"data": [{"id": "policy-1"}]})
         result = call("list_access_policies", {"limit": 100})
         assert "data" in result
+
+
+class TestMCPServerIntegration:
+    """Test MCP server integration with tool registry."""
+
+    def test_list_tools_count(self):
+        """list_tools() should return 52 tools."""
+        from scm_mcp_server.server import list_tools
+        import asyncio
+
+        tools = asyncio.run(list_tools())
+        assert len(tools) == 52, f"Expected 52 tools, got {len(tools)}"
+
+    def test_list_tools_structure(self):
+        """Verify Tool objects have correct structure."""
+        from scm_mcp_server.server import list_tools
+        import asyncio
+
+        tools = asyncio.run(list_tools())
+        sample_tool = tools[0]
+
+        assert hasattr(sample_tool, "name")
+        assert hasattr(sample_tool, "description")
+        assert hasattr(sample_tool, "inputSchema")
+        assert sample_tool.inputSchema["type"] == "object"
+        assert "properties" in sample_tool.inputSchema
+
+    def test_list_tools_coverage(self):
+        """Verify all implemented tools appear in list_tools()."""
+        from scm_mcp_server.server import list_tools
+        from scm_mcp_server.tools import _LIST_TOOLS, _GET_BY_ID_TOOLS
+        import asyncio
+
+        tools = asyncio.run(list_tools())
+        tool_names = {t.name for t in tools}
+
+        # All list tools should be present
+        for name in _LIST_TOOLS.keys():
+            assert name in tool_names, f"Missing list tool: {name}"
+
+        # All get-by-ID tools should be present
+        for name in _GET_BY_ID_TOOLS.keys():
+            assert name in tool_names, f"Missing get-by-ID tool: {name}"

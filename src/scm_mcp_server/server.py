@@ -21,19 +21,44 @@ async def list_tools() -> list[Tool]:
     """List available MCP tools.
 
     Returns:
-        Empty list (TODO: Phase 1 - populate from tool registry).
+        List of Tool objects generated from routing tables.
     """
-    # TODO: Phase 1 - Generate tools list from OpenAPI specs
-    # tools_list = []
-    # for tool_def in tool_registry:
-    #     tools_list.append(Tool(
-    #         name=tool_def.name,
-    #         description=tool_def.description,
-    #         inputSchema=tool_def.input_schema,
-    #     ))
-    # return tools_list
+    from .tools import _LIST_TOOLS, _GET_BY_ID_TOOLS
+    from .tools.schemas import list_schema, get_by_id_schema
 
-    return []
+    tools_list: list[Tool] = []
+
+    # Generate list tools
+    for name, (path, param_keys) in _LIST_TOOLS.items():
+        # Determine if this tool requires container param (folder/snippet/device)
+        # For now, assume all config/security tools require it, ops/iam do not
+        requires_container = path.startswith("/config/")
+
+        tools_list.append(
+            Tool(
+                name=name,
+                description=f"List resources at {path}",
+                inputSchema=list_schema(required_container=requires_container),
+            )
+        )
+
+    # Generate get-by-ID tools
+    for name, (path_template, param_keys) in _GET_BY_ID_TOOLS.items():
+        # Determine ID param name (first in param_keys)
+        id_param_name = param_keys[0]
+        requires_container = path_template.startswith("/config/")
+
+        tools_list.append(
+            Tool(
+                name=name,
+                description=f"Get resource by {id_param_name} at {path_template}",
+                inputSchema=get_by_id_schema(
+                    id_param_name=id_param_name, required_container=requires_container
+                ),
+            )
+        )
+
+    return tools_list
 
 
 @app.call_tool()
