@@ -167,3 +167,69 @@ class TestObjectsCoreTools:
         mock_rest_client.return_value = (200, {"id": "edl-1"})
         result = call("get_external_dynamic_list", {"id": "edl-1"})
         assert result["id"] == "edl-1"
+
+
+class TestSecurityRulesTools:
+    """Test Security Rules read-only tools (8 tools)."""
+
+    # ========================================================================
+    # List operations (4 tools)
+    # ========================================================================
+
+    def test_list_security_rules_success(self, mock_rest_client):
+        """list_security_rules: success case."""
+        mock_rest_client.return_value = (200, {"data": [{"id": "rule-1", "name": "allow-web"}], "total": 1})
+
+        result = call("list_security_rules", {"folder": "Shared", "limit": 50})
+
+        mock_rest_client.assert_called_once_with("GET", "/config/security/v1/security-rules", params={"folder": "Shared", "limit": 50})
+        assert result["total"] == 1
+
+    def test_list_decryption_rules(self, mock_rest_client):
+        """list_decryption_rules: basic smoke test."""
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_decryption_rules", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_list_app_override_rules(self, mock_rest_client):
+        """list_app_override_rules: basic smoke test."""
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_app_override_rules", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_list_dos_protection_rules(self, mock_rest_client):
+        """list_dos_protection_rules: basic smoke test."""
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_dos_protection_rules", {"folder": "Shared"})
+        assert "data" in result
+
+    # ========================================================================
+    # Get-by-ID operations (4 tools)
+    # ========================================================================
+
+    def test_get_security_rule_success(self, mock_rest_client):
+        """get_security_rule: success case."""
+        mock_rest_client.return_value = (200, {"id": "rule-123", "name": "allow-ssh", "action": "allow"})
+
+        result = call("get_security_rule", {"id": "rule-123", "folder": "Shared"})
+
+        mock_rest_client.assert_called_once_with("GET", "/config/security/v1/security-rules/rule-123", params={"folder": "Shared"})
+        assert result["action"] == "allow"
+
+    def test_get_decryption_rule(self, mock_rest_client):
+        """get_decryption_rule: basic smoke test."""
+        mock_rest_client.return_value = (200, {"id": "dec-1"})
+        result = call("get_decryption_rule", {"id": "dec-1"})
+        assert result["id"] == "dec-1"
+
+    def test_get_app_override_rule(self, mock_rest_client):
+        """get_app_override_rule: basic smoke test."""
+        mock_rest_client.return_value = (200, {"id": "ao-1"})
+        result = call("get_app_override_rule", {"id": "ao-1"})
+        assert result["id"] == "ao-1"
+
+    def test_get_dos_protection_rule(self, mock_rest_client):
+        """get_dos_protection_rule: basic smoke test."""
+        mock_rest_client.return_value = (200, {"id": "dos-1"})
+        result = call("get_dos_protection_rule", {"id": "dos-1"})
+        assert result["id"] == "dos-1"

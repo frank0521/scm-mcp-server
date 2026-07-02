@@ -22,6 +22,11 @@ _LIST_TOOLS: dict[str, tuple[str, tuple[str, ...]]] = {
     "list_tags": ("/config/objects/v1/tags", ("folder", "snippet", "device", "name", "limit", "offset")),
     "list_application_groups": ("/config/objects/v1/application-groups", ("folder", "snippet", "device", "name", "limit", "offset")),
     "list_external_dynamic_lists": ("/config/objects/v1/external-dynamic-lists", ("folder", "snippet", "device", "name", "limit", "offset")),
+    # Security Rules
+    "list_security_rules": ("/config/security/v1/security-rules", ("folder", "snippet", "device", "name", "limit", "offset")),
+    "list_decryption_rules": ("/config/security/v1/decryption-rules", ("folder", "snippet", "device", "name", "limit", "offset")),
+    "list_app_override_rules": ("/config/security/v1/app-override-rules", ("folder", "snippet", "device", "name", "limit", "offset")),
+    "list_dos_protection_rules": ("/config/security/v1/dos-protection-rules", ("folder", "snippet", "device", "name", "limit", "offset")),
 }
 
 # Get-by-ID operations: tool_name -> (path_template, tuple_of_param_keys)
@@ -36,6 +41,11 @@ _GET_BY_ID_TOOLS: dict[str, tuple[str, tuple[str, ...]]] = {
     "get_tag": ("/config/objects/v1/tags/{id}", ("id", "folder", "snippet", "device")),
     "get_application_group": ("/config/objects/v1/application-groups/{id}", ("id", "folder", "snippet", "device")),
     "get_external_dynamic_list": ("/config/objects/v1/external-dynamic-lists/{id}", ("id", "folder", "snippet", "device")),
+    # Security Rules
+    "get_security_rule": ("/config/security/v1/security-rules/{id}", ("id", "folder", "snippet", "device")),
+    "get_decryption_rule": ("/config/security/v1/decryption-rules/{id}", ("id", "folder", "snippet", "device")),
+    "get_app_override_rule": ("/config/security/v1/app-override-rules/{id}", ("id", "folder", "snippet", "device")),
+    "get_dos_protection_rule": ("/config/security/v1/dos-protection-rules/{id}", ("id", "folder", "snippet", "device")),
 }
 
 
