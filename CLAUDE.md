@@ -26,6 +26,8 @@ scm-mcp-server/
 ├── DESIGN.md           # L2 architecture and API mapping
 ├── WORKFLOW.md         # L3 implementation phases
 ├── README.md           # User documentation
+├── docs/
+│   └── PRD.md          # Product requirements (target users, MVP scope, acceptance criteria)
 ├── pyproject.toml      # Python project configuration
 ├── .env.example        # Environment variable template
 ├── src/
@@ -41,6 +43,13 @@ scm-mcp-server/
 └── tests/
     └── ...
 ```
+
+### Documentation Hierarchy (Context Stack)
+- **L1 (CLAUDE.md)**: Engineering contract - immutable constraints, technology stack rules
+- **L2 (DESIGN.md)**: Architecture design - component structure, API mappings, technical decisions
+- **L3 (WORKFLOW.md)**: Implementation workflow - phased tasks, acceptance criteria per phase
+- **L4 (README.md)**: User documentation - installation, configuration, usage examples
+- **Product (docs/PRD.md)**: Product requirements - user personas, MVP scope, business acceptance criteria
 
 ## Single Source of Truth (SSOT)
 
