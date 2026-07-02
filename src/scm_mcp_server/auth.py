@@ -68,6 +68,9 @@ class OAuth2Manager:
         Raises:
             RuntimeError: If authentication fails.
         """
+        # Validate config before attempting auth
+        Config.validate()
+
         url = f"{Config.AUTH_URL}/auth/v1/oauth2/access_token"
         data = {
             "grant_type": "client_credentials",

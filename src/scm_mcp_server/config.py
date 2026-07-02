@@ -40,7 +40,3 @@ class Config:
 
         if missing:
             raise RuntimeError(f"缺少必填环境变量: {', '.join(missing)}")
-
-
-# Validate on module import
-Config.validate()
