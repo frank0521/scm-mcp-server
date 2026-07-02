@@ -84,6 +84,91 @@ _GET_BY_ID_TOOLS: dict[str, tuple[str, tuple[str, ...]]] = {
     "get_role": ("/iam/v1/roles/{id}", ("id",)),
 }
 
+# Create operations: tool_name -> (path, tuple_of_body_param_keys, tuple_of_query_param_keys)
+_CREATE_TOOLS: dict[str, tuple[str, tuple[str, ...], tuple[str, ...]]] = {
+    # Objects Core
+    "create_address": ("/config/objects/v1/addresses", (), ("folder", "snippet", "device")),
+    "create_address_group": ("/config/objects/v1/address-groups", (), ("folder", "snippet", "device")),
+    "create_service": ("/config/objects/v1/services", (), ("folder", "snippet", "device")),
+    "create_service_group": ("/config/objects/v1/service-groups", (), ("folder", "snippet", "device")),
+    "create_tag": ("/config/objects/v1/tags", (), ("folder", "snippet", "device")),
+    "create_application_group": ("/config/objects/v1/application-groups", (), ("folder", "snippet", "device")),
+    "create_external_dynamic_list": ("/config/objects/v1/external-dynamic-lists", (), ("folder", "snippet", "device")),
+    # Security Rules
+    "create_security_rule": ("/config/security/v1/security-rules", (), ("folder", "snippet", "device")),
+    "create_decryption_rule": ("/config/security/v1/decryption-rules", (), ("folder", "snippet", "device")),
+    "create_app_override_rule": ("/config/security/v1/app-override-rules", (), ("folder", "snippet", "device")),
+    "create_dos_protection_rule": ("/config/security/v1/dos-protection-rules", (), ("folder", "snippet", "device")),
+    # IAM
+    "create_service_account": ("/iam/v1/service-accounts", (), ()),
+    "create_role": ("/iam/v1/roles", (), ()),
+    "create_access_policy": ("/iam/v1/access-policies", (), ()),
+}
+
+# Update operations: tool_name -> (path_template, tuple_of_body_param_keys, tuple_of_query_param_keys)
+_UPDATE_TOOLS: dict[str, tuple[str, tuple[str, ...], tuple[str, ...]]] = {
+    # Objects Core
+    "update_address": ("/config/objects/v1/addresses/{id}", ("id",), ("folder", "snippet", "device")),
+    "update_address_group": ("/config/objects/v1/address-groups/{id}", ("id",), ("folder", "snippet", "device")),
+    "update_service": ("/config/objects/v1/services/{id}", ("id",), ("folder", "snippet", "device")),
+    "update_service_group": ("/config/objects/v1/service-groups/{id}", ("id",), ("folder", "snippet", "device")),
+    "update_tag": ("/config/objects/v1/tags/{id}", ("id",), ("folder", "snippet", "device")),
+    "update_application_group": ("/config/objects/v1/application-groups/{id}", ("id",), ("folder", "snippet", "device")),
+    "update_external_dynamic_list": ("/config/objects/v1/external-dynamic-lists/{id}", ("id",), ("folder", "snippet", "device")),
+    # Security Rules
+    "update_security_rule": ("/config/security/v1/security-rules/{id}", ("id",), ("folder", "snippet", "device")),
+    "update_decryption_rule": ("/config/security/v1/decryption-rules/{id}", ("id",), ("folder", "snippet", "device")),
+    "update_app_override_rule": ("/config/security/v1/app-override-rules/{id}", ("id",), ("folder", "snippet", "device")),
+    "update_dos_protection_rule": ("/config/security/v1/dos-protection-rules/{id}", ("id",), ("folder", "snippet", "device")),
+    # IAM
+    "update_service_account": ("/iam/v1/service-accounts/{id}", ("id",), ()),
+}
+
+# Delete operations: tool_name -> (path_template, tuple_of_path_param_keys, tuple_of_query_param_keys)
+_DELETE_TOOLS: dict[str, tuple[str, tuple[str, ...], tuple[str, ...]]] = {
+    # Objects Core
+    "delete_address": ("/config/objects/v1/addresses/{id}", ("id",), ("folder", "snippet", "device")),
+    "delete_address_group": ("/config/objects/v1/address-groups/{id}", ("id",), ("folder", "snippet", "device")),
+    "delete_service": ("/config/objects/v1/services/{id}", ("id",), ("folder", "snippet", "device")),
+    "delete_service_group": ("/config/objects/v1/service-groups/{id}", ("id",), ("folder", "snippet", "device")),
+    "delete_tag": ("/config/objects/v1/tags/{id}", ("id",), ("folder", "snippet", "device")),
+    "delete_application_group": ("/config/objects/v1/application-groups/{id}", ("id",), ("folder", "snippet", "device")),
+    "delete_external_dynamic_list": ("/config/objects/v1/external-dynamic-lists/{id}", ("id",), ("folder", "snippet", "device")),
+    # Security Rules
+    "delete_security_rule": ("/config/security/v1/security-rules/{id}", ("id",), ("folder", "snippet", "device")),
+    "delete_decryption_rule": ("/config/security/v1/decryption-rules/{id}", ("id",), ("folder", "snippet", "device")),
+    "delete_app_override_rule": ("/config/security/v1/app-override-rules/{id}", ("id",), ("folder", "snippet", "device")),
+    "delete_dos_protection_rule": ("/config/security/v1/dos-protection-rules/{id}", ("id",), ("folder", "snippet", "device")),
+    # IAM
+    "delete_service_account": ("/iam/v1/service-accounts/{id}", ("id",), ()),
+    "delete_role": ("/iam/v1/roles/{id}", ("id",), ()),
+    "delete_access_policy": ("/iam/v1/access-policies/{id}", ("id",), ()),
+}
+
+# Move operations (special case for rules): tool_name -> (path_template, tuple_of_path_param_keys)
+_MOVE_TOOLS: dict[str, tuple[str, tuple[str, ...]]] = {
+    "move_security_rule": ("/config/security/v1/security-rules/{id}:move", ("id",)),
+    "move_decryption_rule": ("/config/security/v1/decryption-rules/{id}:move", ("id",)),
+    "move_app_override_rule": ("/config/security/v1/app-override-rules/{id}:move", ("id",)),
+}
+
+
+# ============================================================================
+# Helper Functions
+# ============================================================================
+
+def _pick(data: dict[str, Any], keys: tuple[str, ...]) -> dict[str, Any]:
+    """Extract subset of keys from data, filtering out None values.
+
+    Args:
+        data: Source dictionary
+        keys: Keys to extract
+
+    Returns:
+        Dictionary with only specified keys (non-None values).
+    """
+    return {key: data[key] for key in keys if key in data and data[key] is not None}
+
 
 # ============================================================================
 # Dispatcher
@@ -108,10 +193,18 @@ def call(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         return _handle_list(name, arguments)
     elif name in _GET_BY_ID_TOOLS:
         return _handle_get_by_id(name, arguments)
+    elif name in _CREATE_TOOLS:
+        return _handle_create(name, arguments)
+    elif name in _UPDATE_TOOLS:
+        return _handle_update(name, arguments)
+    elif name in _DELETE_TOOLS:
+        return _handle_delete(name, arguments)
+    elif name in _MOVE_TOOLS:
+        return _handle_move(name, arguments)
     else:
         raise NotImplementedError(
             f"Tool '{name}' not implemented. "
-            "Available tools: see _LIST_TOOLS and _GET_BY_ID_TOOLS in tools/__init__.py"
+            "Available tools: see routing tables in tools/__init__.py"
         )
 
 
@@ -127,8 +220,8 @@ def _handle_list(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
     """
     path, param_keys = _LIST_TOOLS[name]
 
-    # Build query params (filter out None values)
-    params = {key: arguments[key] for key in param_keys if key in arguments and arguments[key] is not None}
+    # Build query params
+    params = _pick(arguments, param_keys)
 
     status, body = rest_client.request("GET", path, params=params)
 
@@ -165,7 +258,7 @@ def _handle_get_by_id(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
 
     # Build query params (remaining keys after path param)
     query_param_keys = param_keys[1:]
-    params = {key: arguments[key] for key in query_param_keys if key in arguments and arguments[key] is not None}
+    params = _pick(arguments, query_param_keys)
 
     status, body = rest_client.request("GET", path, params=params)
 
@@ -173,3 +266,140 @@ def _handle_get_by_id(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         return body  # type: ignore
     else:
         return {"error": f"API request failed with HTTP {status}", "status": status, "body": body}
+
+
+def _handle_create(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+    """Handle create operations (POST).
+
+    Args:
+        name: Tool name from _CREATE_TOOLS
+        arguments: Request body data + optional query params (folder/snippet/device)
+
+    Returns:
+        API response or error dict.
+    """
+    path, body_param_keys, query_param_keys = _CREATE_TOOLS[name]
+
+    # Build query params
+    params = _pick(arguments, query_param_keys)
+
+    # Build request body (everything except query params)
+    reserved_keys = set(query_param_keys)
+    body = {key: value for key, value in arguments.items() if key not in reserved_keys and value is not None}
+
+    status, response = rest_client.request("POST", path, params=params, json=body)
+
+    if 200 <= status < 300:
+        return response  # type: ignore
+    else:
+        return {"error": f"API request failed with HTTP {status}", "status": status, "body": response}
+
+
+def _handle_update(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+    """Handle update operations (PUT).
+
+    Args:
+        name: Tool name from _UPDATE_TOOLS
+        arguments: Must include path param (e.g., 'id') + body data + optional query params
+
+    Returns:
+        API response or error dict.
+    """
+    path_template, path_param_keys, query_param_keys = _UPDATE_TOOLS[name]
+
+    # Extract path parameter (first in path_param_keys)
+    path_param_name = path_param_keys[0]
+    if path_param_name not in arguments:
+        return {
+            "error": f"Missing required parameter: {path_param_name}",
+            "status": 400,
+            "body": None,
+        }
+
+    path_param_value = arguments[path_param_name]
+    path = path_template.replace(f"{{{path_param_name}}}", str(path_param_value))
+
+    # Build query params
+    params = _pick(arguments, query_param_keys)
+
+    # Build request body (everything except path param and query params)
+    reserved_keys = set(path_param_keys) | set(query_param_keys)
+    body = {key: value for key, value in arguments.items() if key not in reserved_keys and value is not None}
+
+    status, response = rest_client.request("PUT", path, params=params, json=body)
+
+    if 200 <= status < 300:
+        return response  # type: ignore
+    else:
+        return {"error": f"API request failed with HTTP {status}", "status": status, "body": response}
+
+
+def _handle_delete(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+    """Handle delete operations (DELETE).
+
+    Args:
+        name: Tool name from _DELETE_TOOLS
+        arguments: Must include path param (e.g., 'id') + optional query params
+
+    Returns:
+        API response or error dict.
+    """
+    path_template, path_param_keys, query_param_keys = _DELETE_TOOLS[name]
+
+    # Extract path parameter (first in path_param_keys)
+    path_param_name = path_param_keys[0]
+    if path_param_name not in arguments:
+        return {
+            "error": f"Missing required parameter: {path_param_name}",
+            "status": 400,
+            "body": None,
+        }
+
+    path_param_value = arguments[path_param_name]
+    path = path_template.replace(f"{{{path_param_name}}}", str(path_param_value))
+
+    # Build query params
+    params = _pick(arguments, query_param_keys)
+
+    status, response = rest_client.request("DELETE", path, params=params)
+
+    if 200 <= status < 300:
+        return response  # type: ignore
+    else:
+        return {"error": f"API request failed with HTTP {status}", "status": status, "body": response}
+
+
+def _handle_move(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+    """Handle move operations (POST with :move action).
+
+    Args:
+        name: Tool name from _MOVE_TOOLS
+        arguments: Must include 'id' + move directive (e.g., 'destination', 'where')
+
+    Returns:
+        API response or error dict.
+    """
+    path_template, path_param_keys = _MOVE_TOOLS[name]
+
+    # Extract path parameter
+    path_param_name = path_param_keys[0]
+    if path_param_name not in arguments:
+        return {
+            "error": f"Missing required parameter: {path_param_name}",
+            "status": 400,
+            "body": None,
+        }
+
+    path_param_value = arguments[path_param_name]
+    path = path_template.replace(f"{{{path_param_name}}}", str(path_param_value))
+
+    # Build request body (everything except path param)
+    reserved_keys = set(path_param_keys)
+    body = {key: value for key, value in arguments.items() if key not in reserved_keys and value is not None}
+
+    status, response = rest_client.request("POST", path, params={}, json=body)
+
+    if 200 <= status < 300:
+        return response  # type: ignore
+    else:
+        return {"error": f"API request failed with HTTP {status}", "status": status, "body": response}

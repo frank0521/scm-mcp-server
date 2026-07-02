@@ -488,3 +488,173 @@ class TestMCPServerIntegration:
         # All get-by-ID tools should be present
         for name in _GET_BY_ID_TOOLS.keys():
             assert name in tool_names, f"Missing get-by-ID tool: {name}"
+
+
+class TestWriteOperations:
+    """Test write operations (create/update/delete/move)."""
+
+    # ========================================================================
+    # Create operations
+    # ========================================================================
+
+    def test_create_address_success(self, mock_rest_client):
+        """create_address: success case."""
+        mock_rest_client.return_value = (201, {"id": "new-addr", "name": "test-address"})
+
+        result = call("create_address", {
+            "name": "test-address",
+            "ip_netmask": "10.0.0.1/32",
+            "folder": "Shared",
+        })
+
+        # Verify POST request with correct path, params, and body
+        mock_rest_client.assert_called_once_with(
+            "POST",
+            "/config/objects/v1/addresses",
+            params={"folder": "Shared"},
+            json={"name": "test-address", "ip_netmask": "10.0.0.1/32"},
+        )
+        assert result["id"] == "new-addr"
+
+    def test_create_security_rule(self, mock_rest_client):
+        """create_security_rule: smoke test."""
+        mock_rest_client.return_value = (201, {"id": "rule-new"})
+        result = call("create_security_rule", {
+            "name": "allow-ssh",
+            "action": "allow",
+            "folder": "Shared",
+        })
+        assert result["id"] == "rule-new"
+
+    def test_create_service_account(self, mock_rest_client):
+        """create_service_account: IAM create (no folder param)."""
+        mock_rest_client.return_value = (201, {"id": "sa-new"})
+        result = call("create_service_account", {"name": "test-sa"})
+
+        mock_rest_client.assert_called_once_with(
+            "POST",
+            "/iam/v1/service-accounts",
+            params={},
+            json={"name": "test-sa"},
+        )
+        assert result["id"] == "sa-new"
+
+    # ========================================================================
+    # Update operations
+    # ========================================================================
+
+    def test_update_address_success(self, mock_rest_client):
+        """update_address: success case."""
+        mock_rest_client.return_value = (200, {"id": "addr-123", "name": "updated-addr"})
+
+        result = call("update_address", {
+            "id": "addr-123",
+            "name": "updated-addr",
+            "ip_netmask": "10.0.0.2/32",
+            "folder": "Shared",
+        })
+
+        mock_rest_client.assert_called_once_with(
+            "PUT",
+            "/config/objects/v1/addresses/addr-123",
+            params={"folder": "Shared"},
+            json={"name": "updated-addr", "ip_netmask": "10.0.0.2/32"},
+        )
+        assert result["name"] == "updated-addr"
+
+    def test_update_address_missing_id(self, mock_rest_client):
+        """update_address: missing required 'id' parameter."""
+        result = call("update_address", {"name": "test", "folder": "Shared"})
+
+        assert result["error"] == "Missing required parameter: id"
+        assert result["status"] == 400
+        mock_rest_client.assert_not_called()
+
+    def test_update_service_account(self, mock_rest_client):
+        """update_service_account: IAM update (no folder param)."""
+        mock_rest_client.return_value = (200, {"id": "sa-123", "name": "updated-sa"})
+        result = call("update_service_account", {"id": "sa-123", "name": "updated-sa"})
+
+        mock_rest_client.assert_called_once_with(
+            "PUT",
+            "/iam/v1/service-accounts/sa-123",
+            params={},
+            json={"name": "updated-sa"},
+        )
+
+    # ========================================================================
+    # Delete operations
+    # ========================================================================
+
+    def test_delete_address_success(self, mock_rest_client):
+        """delete_address: success case."""
+        mock_rest_client.return_value = (204, {})
+
+        result = call("delete_address", {"id": "addr-123", "folder": "Shared"})
+
+        mock_rest_client.assert_called_once_with(
+            "DELETE",
+            "/config/objects/v1/addresses/addr-123",
+            params={"folder": "Shared"},
+        )
+        assert result == {}
+
+    def test_delete_security_rule(self, mock_rest_client):
+        """delete_security_rule: smoke test."""
+        mock_rest_client.return_value = (204, {})
+        result = call("delete_security_rule", {"id": "rule-123", "folder": "Shared"})
+        assert result == {}
+
+    def test_delete_service_account(self, mock_rest_client):
+        """delete_service_account: IAM delete (no folder param)."""
+        mock_rest_client.return_value = (204, {})
+        result = call("delete_service_account", {"id": "sa-123"})
+
+        mock_rest_client.assert_called_once_with(
+            "DELETE",
+            "/iam/v1/service-accounts/sa-123",
+            params={},
+        )
+
+    # ========================================================================
+    # Move operations
+    # ========================================================================
+
+    def test_move_security_rule_success(self, mock_rest_client):
+        """move_security_rule: success case."""
+        mock_rest_client.return_value = (200, {"id": "rule-123", "position": "after-rule-456"})
+
+        result = call("move_security_rule", {
+            "id": "rule-123",
+            "destination": "after",
+            "rulebase": "default",
+            "destination_rule": "rule-456",
+        })
+
+        mock_rest_client.assert_called_once_with(
+            "POST",
+            "/config/security/v1/security-rules/rule-123:move",
+            params={},
+            json={"destination": "after", "rulebase": "default", "destination_rule": "rule-456"},
+        )
+        assert result["id"] == "rule-123"
+
+    def test_move_decryption_rule(self, mock_rest_client):
+        """move_decryption_rule: smoke test."""
+        mock_rest_client.return_value = (200, {"id": "dec-1"})
+        result = call("move_decryption_rule", {"id": "dec-1", "destination": "top"})
+        assert result["id"] == "dec-1"
+
+    # ========================================================================
+    # Error handling
+    # ========================================================================
+
+    def test_create_error_response(self, mock_rest_client):
+        """create operation: non-2xx response."""
+        mock_rest_client.return_value = (400, {"message": "Invalid request"})
+
+        result = call("create_address", {"name": "test", "folder": "Shared"})
+
+        assert result["error"] == "API request failed with HTTP 400"
+        assert result["status"] == 400
+        assert result["body"]["message"] == "Invalid request"
