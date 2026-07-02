@@ -138,16 +138,56 @@ class ToolDefinition:
 ```
 
 **Tool Naming Convention**:
-- Format: `scm_<module>_<action>_<resource>`
+
+**Ideal Format**: `scm_<module>_<action>_<resource>`
 - Module: `auth`, `iam`, `sase`, `cloudngfw`, `subscription`, `tenancy`
 - Action: `list`, `get`, `create`, `update`, `delete`
 - Resource: singular/plural noun (e.g., `service_accounts`, `security_rule`)
 
-Examples:
+**Ideal Examples**:
 - `scm_iam_list_service_accounts` (GET /iam/v1/service-accounts)
 - `scm_iam_create_access_policy` (POST /iam/v1/access-policies)
 - `scm_sase_list_security_rules` (GET /config/security/v1/security-rules)
 - `scm_sase_update_address_object` (PUT /config/objects/v1/addresses/{id})
+
+**Actual Implementation Note** (as of 0.1.0):
+
+Tool names are derived from OpenAPI `operationId` fields. When `operationId` is present, the tool name is `scm_{operationId}` (converted to lowercase with hyphens replaced by underscores). When `operationId` is absent, the name is derived from the HTTP method and path.
+
+**Actual Naming Patterns Observed** (from E2E testing, 916 tools):
+
+1. **operationId-based** (most common):
+   - `scm_addurladminoverride` (operationId: `addUrlAdminOverride`)
+   - `scm_listauthenticationrules` (operationId: `listAuthenticationRules`)
+   - `scm_createaddress` (operationId: `createAddress`)
+   - `scm_get-iam-v1-service_accounts` (operationId: `get-iam-v1-service_accounts`)
+
+2. **Prefixed module names** (CIE DSS, posture management):
+   - `scm_ciedss_create_cache_groups` (module prefix preserved)
+   - `scm_batchdeleteposturechecks` (batch operations)
+   - `scm_batchupsertposturechecks`
+
+3. **Autocomplete utilities**:
+   - `scm_autocompletehagateways`
+   - `scm_autocompletehaipaddresses`
+   - `scm_autocompletehanetmasks`
+
+4. **Job/operation tools**:
+   - `scm_bgppolicyexport` (async job initiation)
+   - `scm_configaudit`
+
+**Naming Inconsistencies**:
+- Some tools lack module prefix (e.g., `scm_addurladminoverride` instead of `scm_url_add_admin_override`)
+- CamelCase in operationId is flattened to lowercase (no underscores between words)
+- Duplicate names across SASE/Cloud NGFW/NGFW specs (latest definition wins)
+
+**Deduplication Strategy**:
+When multiple OpenAPI files define the same operationId, the parser uses the **latest definition** encountered during filesystem traversal. This is logged as a warning but does not cause errors. Approximately 200+ duplicate tool names exist across the 41 OpenAPI files.
+
+**Recommendation for Future Versions**:
+- Normalize operationId-based names to follow `<module>_<action>_<resource>` pattern
+- Add module prefix when missing
+- Implement deterministic deduplication (e.g., prefer SASE > Cloud NGFW > NGFW)
 
 ## MCP Tools Mapping
 
