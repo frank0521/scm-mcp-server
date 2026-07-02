@@ -2,104 +2,50 @@
 
 Model Context Protocol (MCP) server for **Palo Alto Networks Strata Cloud Manager (SCM)**.
 
-This server enables Claude, Cursor, and other MCP clients to interact directly with the SCM API using natural language.
-
----
-
-## Features
-
-- 🔐 **OAuth2 Authentication**: Automatic token management with client_credentials flow
-- 🛠️ **Dynamic Tool Generation**: Tools automatically generated from OpenAPI specifications
-- 📦 **Full API Coverage**: Supports IAM, SASE Config, Cloud NGFW, Subscription, and Tenancy modules
-- 🚀 **Zero Configuration**: Works out of the box with environment variables
-- 🔄 **Auto Token Refresh**: Handles token expiration transparently
+Enables Claude, Cursor, and other MCP clients to interact with the SCM API using natural language. 168 tools covering Objects, Security Rules, Security Profiles, Operations, and IAM.
 
 ---
 
 ## Prerequisites
 
-- **Python 3.11** or higher
-- **SCM OAuth2 Credentials**:
-  - Client ID
-  - Client Secret
-  - Tenant Service Group (TSG) ID
-- **MCP Client**: Claude Desktop, Claude CLI, or Cursor
+- **Python 3.11+**
+- **SCM OAuth2 Credentials**: Client ID, Client Secret, TSG ID
+- **MCP Client**: Claude CLI, Claude Desktop, or Cursor
 
 ---
 
 ## Installation
 
-### 1. Clone the Repository
-
 ```bash
-cd ~/vibe-coding/
-git clone <repository-url> scm-mcp-server
-cd scm-mcp-server
-```
-
-### 2. Create Virtual Environment (Recommended)
-
-**macOS/Linux**:
-```bash
+cd ~/vibe-coding/scm-mcp-server
 python3 -m venv venv
 source venv/bin/activate
-```
-
-**Windows**:
-```bash
-python -m venv venv
-venv\Scripts\activate
-```
-
-**Why virtual environment?**  
-On macOS with system Python (3.14+), PEP 668 requires virtual environments to prevent system package conflicts.
-
-### 3. Install Dependencies
-
-```bash
 pip install -e .
-```
-
-This installs the package in editable mode with all required dependencies:
-- `mcp` - Official MCP SDK
-- `httpx` - Async HTTP client
-- `pyyaml` - OpenAPI parsing
-- `pydantic` - Data validation
-- `python-dotenv` - Environment variable management
-
-### 4. Configure Environment Variables
-
-Create a `.env` file or export variables in your shell:
-
-```bash
-export SCM_CLIENT_ID="your-client-id"
-export SCM_CLIENT_SECRET="your-client-secret"
-export SCM_TSG_ID="your-tsg-id"
-export SCM_BASE_URL="https://api.strata.paloaltonetworks.com"  # Optional, this is the default
-```
-
-Or copy `.env.example` and fill in your credentials:
-
-```bash
-cp .env.example .env
-# Edit .env with your credentials
 ```
 
 ---
 
 ## Configuration
 
-### Claude Desktop / Claude CLI
+### Environment Variables
 
-Edit `~/.claude/claude_desktop_config.json`:
+```bash
+export SCM_CLIENT_ID="your-client-id"
+export SCM_CLIENT_SECRET="your-client-secret"
+export SCM_TSG_ID="your-tsg-id"
+export SCM_BASE_URL="https://api.strata.paloaltonetworks.com"  # optional, this is the default
+```
 
-**Option 1: Using Virtual Environment (Recommended)**
+### Claude CLI / Claude Desktop
+
+Add to `~/.claude.json` or `~/.claude/claude_desktop_config.json`:
+
 ```json
 {
   "mcpServers": {
     "scm": {
-      "command": "/Users/YOUR_USERNAME/vibe-coding/scm-mcp-server/venv/bin/python",
-      "args": ["-m", "scm_mcp.server"],
+      "command": "/path/to/scm-mcp-server/venv/bin/python",
+      "args": ["-m", "scm_mcp_server.server"],
       "env": {
         "SCM_CLIENT_ID": "your-client-id",
         "SCM_CLIENT_SECRET": "your-client-secret",
@@ -109,41 +55,17 @@ Edit `~/.claude/claude_desktop_config.json`:
   }
 }
 ```
-
-**Option 2: Using System Python (if no virtual environment)**
-```json
-{
-  "mcpServers": {
-    "scm": {
-      "command": "python3",
-      "args": ["-m", "scm_mcp.server"],
-      "env": {
-        "SCM_CLIENT_ID": "your-client-id",
-        "SCM_CLIENT_SECRET": "your-client-secret",
-        "SCM_TSG_ID": "your-tsg-id"
-      }
-    }
-  }
-}
-```
-
-**Note**: 
-- Replace `YOUR_USERNAME` with your actual username
-- Replace `your-client-id`, `your-client-secret`, and `your-tsg-id` with your actual credentials
-- Use absolute path to venv Python for reliability
 
 ### Cursor
 
-Add to Cursor's MCP configuration file (location varies by OS):
-
-**macOS**: `~/Library/Application Support/Cursor/User/globalStorage/mcp.json`
+Add to Cursor MCP settings (`~/Library/Application Support/Cursor/User/globalStorage/mcp.json` on macOS):
 
 ```json
 {
   "mcpServers": {
     "scm": {
-      "command": "python",
-      "args": ["-m", "scm_mcp.server"],
+      "command": "/path/to/scm-mcp-server/venv/bin/python",
+      "args": ["-m", "scm_mcp_server.server"],
       "env": {
         "SCM_CLIENT_ID": "your-client-id",
         "SCM_CLIENT_SECRET": "your-client-secret",
@@ -154,361 +76,184 @@ Add to Cursor's MCP configuration file (location varies by OS):
 }
 ```
 
-### Manual Testing
+---
 
-You can run the server directly for testing:
+## Available Tools (168)
 
-```bash
-python -m scm_mcp.server
-```
+### Objects Core (35 tools)
 
-The server uses stdio transport and expects JSON-RPC messages on stdin.
+| Resource | list | get | create | update | delete |
+|----------|------|-----|--------|--------|--------|
+| Addresses | `list_addresses` | `get_address` | `create_address` | `update_address` | `delete_address` |
+| Address Groups | `list_address_groups` | `get_address_group` | `create_address_group` | `update_address_group` | `delete_address_group` |
+| Services | `list_services` | `get_service` | `create_service` | `update_service` | `delete_service` |
+| Service Groups | `list_service_groups` | `get_service_group` | `create_service_group` | `update_service_group` | `delete_service_group` |
+| Tags | `list_tags` | `get_tag` | `create_tag` | `update_tag` | `delete_tag` |
+| Application Groups | `list_application_groups` | `get_application_group` | `create_application_group` | `update_application_group` | `delete_application_group` |
+| External Dynamic Lists | `list_external_dynamic_lists` | `get_external_dynamic_list` | `create_external_dynamic_list` | `update_external_dynamic_list` | `delete_external_dynamic_list` |
+
+### Objects Extended (40 tools)
+
+| Resource | list | get | create | update | delete |
+|----------|------|-----|--------|--------|--------|
+| Applications | `list_applications` | `get_application` | - | - | - |
+| Application Filters | `list_application_filters` | `get_application_filter` | `create_application_filter` | `update_application_filter` | `delete_application_filter` |
+| Schedules | `list_schedules` | `get_schedule` | `create_schedule` | `update_schedule` | `delete_schedule` |
+| Regions | `list_regions` | `get_region` | `create_region` | `update_region` | `delete_region` |
+| HIP Objects | `list_hip_objects` | `get_hip_object` | `create_hip_object` | `update_hip_object` | `delete_hip_object` |
+| HIP Profiles | `list_hip_profiles` | `get_hip_profile` | `create_hip_profile` | `update_hip_profile` | `delete_hip_profile` |
+| Log Forwarding Profiles | `list_log_forwarding_profiles` | `get_log_forwarding_profile` | `create_log_forwarding_profile` | `update_log_forwarding_profile` | `delete_log_forwarding_profile` |
+| HTTP Server Profiles | `list_http_server_profiles` | `get_http_server_profile` | `create_http_server_profile` | - | `delete_http_server_profile` |
+| Syslog Server Profiles | `list_syslog_server_profiles` | `get_syslog_server_profile` | `create_syslog_server_profile` | - | `delete_syslog_server_profile` |
+
+### Security Rules (23 tools)
+
+| Resource | list | get | create | update | delete | move |
+|----------|------|-----|--------|--------|--------|------|
+| Security Rules | `list_security_rules` | `get_security_rule` | `create_security_rule` | `update_security_rule` | `delete_security_rule` | `move_security_rule` |
+| Decryption Rules | `list_decryption_rules` | `get_decryption_rule` | `create_decryption_rule` | `update_decryption_rule` | `delete_decryption_rule` | `move_decryption_rule` |
+| App Override Rules | `list_app_override_rules` | `get_app_override_rule` | `create_app_override_rule` | `update_app_override_rule` | `delete_app_override_rule` | `move_app_override_rule` |
+| DoS Protection Rules | `list_dos_protection_rules` | `get_dos_protection_rule` | `create_dos_protection_rule` | `update_dos_protection_rule` | `delete_dos_protection_rule` | - |
+
+### Security Profiles (50 tools: 20 read + 30 write)
+
+| Profile Type | list | get | create | update | delete |
+|-------------|------|-----|--------|--------|--------|
+| Anti-Spyware | `list_anti_spyware_profiles` | `get_anti_spyware_profile` | `create_anti_spyware_profile` | `update_anti_spyware_profile` | `delete_anti_spyware_profile` |
+| Vulnerability Protection | `list_vulnerability_protection_profiles` | `get_vulnerability_protection_profile` | `create_vulnerability_protection_profile` | `update_vulnerability_protection_profile` | `delete_vulnerability_protection_profile` |
+| URL Filtering | `list_url_filtering_profiles` | `get_url_filtering_profile` | `create_url_filtering_profile` | `update_url_filtering_profile` | `delete_url_filtering_profile` |
+| File Blocking | `list_file_blocking_profiles` | `get_file_blocking_profile` | `create_file_blocking_profile` | `update_file_blocking_profile` | `delete_file_blocking_profile` |
+| Wildfire Anti-Virus | `list_wildfire_anti_virus_profiles` | `get_wildfire_anti_virus_profile` | `create_wildfire_anti_virus_profile` | `update_wildfire_anti_virus_profile` | `delete_wildfire_anti_virus_profile` |
+| DNS Security | `list_dns_security_profiles` | `get_dns_security_profile` | `create_dns_security_profile` | `update_dns_security_profile` | `delete_dns_security_profile` |
+| DoS Protection | `list_dos_protection_profiles` | `get_dos_protection_profile` | `create_dos_protection_profile` | `update_dos_protection_profile` | `delete_dos_protection_profile` |
+| Security Profile Groups | `list_security_profile_groups` | `get_security_profile_group` | `create_security_profile_group` | `update_security_profile_group` | `delete_security_profile_group` |
+| Decryption Profiles | `list_decryption_profiles` | `get_decryption_profile` | `create_decryption_profile` | `update_decryption_profile` | `delete_decryption_profile` |
+| Zone Protection | `list_zone_protection_profiles` | `get_zone_protection_profile` | `create_zone_protection_profile` | `update_zone_protection_profile` | `delete_zone_protection_profile` |
+
+### Operations (8 tools)
+
+| Tool | Description |
+|------|-------------|
+| `list_jobs` | List configuration jobs |
+| `get_job` | Get job status by ID |
+| `list_config_versions` | List configuration versions |
+| `get_config_version` | Get specific config version |
+| `get_running_config` | Get current running config |
+| `push_candidate_config` | **High-risk**: Push candidate config to devices |
+| `load_candidate_config` | Load config version as candidate |
+| `commit_config` | Commit candidate to running config |
+
+### IAM (12 tools)
+
+| Resource | list | get | create | update | delete |
+|----------|------|-----|--------|--------|--------|
+| Service Accounts | `list_service_accounts` | `get_service_account` | `create_service_account` | `update_service_account` | `delete_service_account` |
+| Roles | `list_roles` | `get_role` | `create_role` | - | `delete_role` |
+| Access Policies | `list_access_policies` | - | `create_access_policy` | - | `delete_access_policy` |
 
 ---
 
 ## Usage Examples
 
-Once configured, you can use natural language with Claude to interact with SCM:
-
-### List Resources
-
 ```
-User: Show me all service accounts in SCM
+User: Show me all security rules in the Production folder
 
-Claude: [Calls scm_iam_list_service_accounts]
-I found 12 service accounts:
-1. backup-service (ID: sa-abc123)
-2. monitoring-agent (ID: sa-def456)
-...
-```
+Claude: [calls list_security_rules with folder="Production"]
+Found 15 security rules...
 
-### Create Resources
+User: Create an address object named "corp-dmz" with IP 192.168.100.0/24
 
-```
-User: Create an address object named "corp-network" with IP range 10.0.0.0/8
+Claude: [calls create_address with name="corp-dmz", ip_netmask="192.168.100.0/24", folder="Shared"]
+Created address object "corp-dmz" (id: addr-xxx)
 
-Claude: [Calls scm_sase_create_address_object with appropriate parameters]
-Successfully created address object "corp-network" with IP 10.0.0.0/8.
-```
+User: Move security rule abc-123 to the top of the pre rulebase
 
-### Get Specific Resources
-
-```
-User: Get details of security rule with ID "rule-12345"
-
-Claude: [Calls scm_sase_get_security_rule]
-Security Rule Details:
-- Name: Block Suspicious Traffic
-- Action: deny
-- Source: any
-- Destination: 192.168.1.0/24
-...
-```
-
-### Filter and Pagination
-
-```
-User: Show me the first 10 security rules in the "Production" folder
-
-Claude: [Calls scm_sase_list_security_rules with folder="Production" and limit=10]
-Here are the first 10 security rules in Production:
-1. Allow-Internal-Traffic
-2. Block-External-Access
-...
+Claude: [calls move_security_rule with id="abc-123", destination="top", rulebase="pre"]
+Rule moved to top position.
 ```
 
 ---
 
-## Available Tools
+## Connectivity Self-Check
 
-The server dynamically generates tools from OpenAPI specifications. To see all available tools:
+Run the stdio smoke test to verify the server starts, registers tools, and responds to calls:
+
+```bash
+source venv/bin/activate
+python scripts/smoke_stdio.py
+```
+
+Expected output (without SCM credentials configured):
+
+```
+[OK] initialize: server=scm-mcp-server
+[OK] tools/list: 168 tools registered
+[OK] tool name set matches routing tables exactly
+[OK] call_tool(list_roles): response received (76 chars)
+```
+
+To verify syntax of all source files:
 
 ```bash
 python -c "
-from scm_mcp.openapi_parser import parse_all_specs
-tools = parse_all_specs('../pan.dev/openapi-specs/scm/')
-for tool in sorted([t.name for t in tools]):
-    print(f'  {tool}')
+import ast, pathlib, sys
+for f in pathlib.Path('src/scm_mcp_server').rglob('*.py'):
+    ast.parse(f.read_text())
+print('OK')
 "
 ```
 
-### Tool Categories
+To run unit tests:
 
-#### Authentication
-- `scm_auth_get_token` - Obtain OAuth2 access token (mostly for testing)
-
-#### IAM (Identity and Access Management)
-- `scm_iam_list_service_accounts` - List all service accounts
-- `scm_iam_get_service_account` - Get service account details
-- `scm_iam_create_service_account` - Create new service account
-- `scm_iam_update_service_account` - Update existing service account
-- `scm_iam_delete_service_account` - Delete service account
-- `scm_iam_list_access_policies` - List access policies
-- `scm_iam_create_access_policy` - Create access policy
-- (Additional IAM tools for roles, permissions, user accounts...)
-
-#### SASE Configuration
-- `scm_sase_list_security_rules` - List security rules
-- `scm_sase_get_security_rule` - Get security rule details
-- `scm_sase_create_security_rule` - Create security rule
-- `scm_sase_update_security_rule` - Update security rule
-- `scm_sase_delete_security_rule` - Delete security rule
-- `scm_sase_list_address_objects` - List address objects
-- `scm_sase_create_address_object` - Create address object
-- (Additional tools for address groups, services, applications...)
-
-#### Cloud NGFW Configuration
-- `scm_cloudngfw_list_security_rules` - List Cloud NGFW security rules
-- `scm_cloudngfw_create_security_rule` - Create Cloud NGFW security rule
-- (Similar structure to SASE tools)
-
-#### Subscription Management
-- `scm_subscription_list_licenses` - List licenses
-- `scm_subscription_get_license` - Get license details
-
-#### Tenancy Management
-- `scm_tenancy_list_tsgs` - List Tenant Service Groups
-- `scm_tenancy_get_tsg` - Get TSG details
+```bash
+pytest tests/ -q
+```
 
 ---
 
 ## Troubleshooting
 
+### Missing Environment Variables
+
+```
+Tool execution error: 缺少必填环境变量: SCM_CLIENT_ID, SCM_CLIENT_SECRET, SCM_TSG_ID
+```
+
+Set the required variables (see Configuration above).
+
 ### Authentication Failed
 
-**Error**: `Authentication failed: Invalid credentials`
+Verify credentials in SCM UI: Settings > Identity & Access > Service Accounts.
 
-**Solutions**:
-1. Verify your credentials in the SCM UI:
-   - Go to Settings → Identity & Access → Service Accounts
-   - Confirm Client ID and Secret are correct
-2. Check environment variables are set:
-   ```bash
-   echo $SCM_CLIENT_ID
-   echo $SCM_CLIENT_SECRET
-   echo $SCM_TSG_ID
-   ```
-3. Ensure TSG ID matches your tenant
+### Permission Denied (403)
 
-### OpenAPI Specs Not Found
-
-**Error**: `FileNotFoundError: ../pan.dev/openapi-specs/scm/`
-
-**Solutions**:
-1. Verify the `pan.dev` repository is cloned at `~/vibe-coding/pan.dev`
-2. Check the relative path is correct from your project directory
-3. If `pan.dev` is elsewhere, update the path in `server.py`
-
-### Tool Not Found
-
-**Error**: `Tool "scm_xxx_yyy" not found`
-
-**Solutions**:
-1. Restart the MCP server to reload OpenAPI specs
-2. Check if the tool exists:
-   ```bash
-   python -c "from scm_mcp.openapi_parser import parse_all_specs; print([t.name for t in parse_all_specs('../pan.dev/openapi-specs/scm/')])"
-   ```
-3. Verify the corresponding OpenAPI file exists and is valid YAML
-
-### Permission Denied / 403 Errors
-
-**Error**: `403 Forbidden`
-
-**Solutions**:
-1. Check service account permissions in SCM
-2. Ensure the service account has access to the requested resources
-3. Verify TSG ID is correct
+Check the service account's IAM access policies in SCM.
 
 ### Connection Timeout
 
-**Error**: `Connection timeout`
-
-**Solutions**:
-1. Check network connectivity to `api.strata.paloaltonetworks.com`
-2. Verify proxy settings if behind a corporate firewall
-3. Increase timeout in `client.py` if needed (default: 30 seconds)
-
-### Token Refresh Loop
-
-**Error**: `401 Unauthorized` repeated multiple times
-
-**Solutions**:
-1. This indicates the token refresh is failing
-2. Check credentials are still valid (not expired/revoked)
-3. Restart the server to clear cached token
-4. Check SCM logs for service account issues
+Verify network connectivity to `api.strata.paloaltonetworks.com`.
 
 ---
 
-## Development
-
-### Project Structure
+## Project Structure
 
 ```
 scm-mcp-server/
-├── CLAUDE.md               # Engineering contract (L1)
-├── DESIGN.md               # Architecture design (L2)
-├── WORKFLOW.md             # Implementation phases (L3)
-├── README.md               # User documentation (this file)
-├── pyproject.toml          # Python project config
-├── .env.example            # Environment variable template
-├── src/
-│   └── scm_mcp/
-│       ├── __init__.py
-│       ├── server.py       # MCP server entry point
-│       ├── auth.py         # OAuth2 authentication
-│       ├── client.py       # SCM REST client
-│       ├── openapi_parser.py  # OpenAPI spec parser
-│       └── tools/
-│           ├── __init__.py
-│           └── base.py     # Tool base class
-└── tests/
-    └── ...
+├── src/scm_mcp_server/
+│   ├── server.py         # MCP server (stdio transport)
+│   ├── rest_client.py    # SCM REST client (httpx + OAuth2)
+│   ├── auth.py           # OAuth2 token management
+│   ├── config.py         # Environment variable loading
+│   └── tools/
+│       ├── __init__.py   # Routing tables + dispatcher
+│       └── schemas.py    # JSON Schema definitions
+├── tests/test_tools.py   # 124 unit tests
+├── scripts/smoke_stdio.py # stdio transport smoke test
+├── CLAUDE.md             # Engineering contract
+├── DESIGN.md             # Architecture + API mapping
+└── WORKFLOW.md           # Implementation phases
 ```
 
-### Running Tests
-
-```bash
-# Unit tests (if implemented)
-pytest tests/
-
-# Integration test
-./tests/integration_test.sh
-```
-
-### Adding Custom Tools
-
-If you need custom logic beyond simple REST calls:
-
-1. Create a new file in `src/scm_mcp/tools/`
-2. Inherit from `BaseTool`
-3. Register in `server.py`
-
-Example:
-```python
-# src/scm_mcp/tools/custom_tool.py
-from .base import BaseTool
-
-class CustomTool(BaseTool):
-    name = "scm_custom_operation"
-    description = "Performs a custom operation"
-    
-    async def execute(self, arguments: dict) -> dict:
-        # Custom logic here
-        pass
-```
-
-### Updating OpenAPI Specs
-
-When SCM API changes:
-1. Pull latest `pan.dev` repository
-2. Restart the MCP server
-3. New/updated tools will be available automatically
-
 ---
 
-## Architecture
-
-See [DESIGN.md](DESIGN.md) for detailed architecture documentation.
-
-**High-level flow**:
-1. Claude calls MCP tool (e.g., `scm_iam_list_service_accounts`)
-2. MCP server validates arguments against OpenAPI schema
-3. Server calls `SCMClient` with HTTP method and path
-4. `SCMClient` adds OAuth2 Bearer token
-5. HTTP request sent to SCM API
-6. Response returned to Claude
-
-**Key principles**:
-- Zero business logic (pure proxy layer)
-- Dynamic tool generation from OpenAPI specs
-- Transparent error handling
-- Automatic token management
-
----
-
-## Security
-
-### Credential Management
-- **Never commit `.env` files** with real credentials
-- Use environment variables or secure secret management
-- Rotate credentials regularly
-
-### API Permissions
-- Service account inherits permissions from SCM IAM policies
-- Follow principle of least privilege
-- Monitor service account usage in SCM audit logs
-
-### Network Security
-- All communication over HTTPS (TLS 1.2+)
-- Validate SCM API certificate (httpx default behavior)
-- Consider IP allowlisting for production environments
-
----
-
-## Contributing
-
-See [WORKFLOW.md](WORKFLOW.md) for implementation phases and development guidelines.
-
-### Coding Standards
-- Type hints required (Python 3.11+ syntax)
-- Follow PEP 8 style guide
-- Use async/await for all I/O operations
-- No hardcoded values (use environment variables)
-
-### Before Submitting
-- [ ] Read [CLAUDE.md](CLAUDE.md) for project constraints
-- [ ] Run type checker: `mypy src/`
-- [ ] Format code: `black src/`
-- [ ] Test manually with Claude CLI
-
----
-
-## Technology Stack
-
-- **Python**: 3.11+
-- **MCP SDK**: [mcp](https://pypi.org/project/mcp/) - Official Model Context Protocol SDK
-- **HTTP Client**: [httpx](https://www.python-httpx.org/) - Async HTTP client
-- **OpenAPI Parsing**: [PyYAML](https://pyyaml.org/) - YAML parser
-- **Data Validation**: [Pydantic](https://docs.pydantic.dev/) - Runtime type checking
-- **Environment Variables**: [python-dotenv](https://pypi.org/project/python-dotenv/)
-
----
-
-## License
-
-(To be determined)
-
----
-
-## Support
-
-For issues and questions:
-1. Check [Troubleshooting](#troubleshooting) section
-2. Review [DESIGN.md](DESIGN.md) for architecture details
-3. Check SCM API documentation at [pan.dev](https://pan.dev/)
-4. Open an issue in this repository
-
----
-
-## Roadmap
-
-### Planned Features
-- [ ] Response caching (configurable)
-- [ ] Rate limiting awareness
-- [ ] Batch operations support
-- [ ] Webhook integration (if SCM supports)
-- [ ] Enhanced logging and metrics
-- [ ] Docker containerization
-
-### Out of Scope
-- Local state management (e.g., database)
-- Alternative authentication methods (only OAuth2)
-- Non-REST protocols (only HTTP/HTTPS)
-
----
-
-**Last Updated**: 2026-07-02  
-**Version**: 0.1.0  
-**Maintainer**: Frank Fan
+**Version**: 0.1.0 | **Tools**: 168 | **Python**: 3.11+ | **Transport**: stdio
