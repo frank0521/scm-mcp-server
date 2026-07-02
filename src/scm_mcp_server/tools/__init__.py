@@ -27,6 +27,17 @@ _LIST_TOOLS: dict[str, tuple[str, tuple[str, ...]]] = {
     "list_decryption_rules": ("/config/security/v1/decryption-rules", ("folder", "snippet", "device", "name", "limit", "offset")),
     "list_app_override_rules": ("/config/security/v1/app-override-rules", ("folder", "snippet", "device", "name", "limit", "offset")),
     "list_dos_protection_rules": ("/config/security/v1/dos-protection-rules", ("folder", "snippet", "device", "name", "limit", "offset")),
+    # Security Profiles (Read-Only)
+    "list_anti_spyware_profiles": ("/config/security/v1/anti-spyware-profiles", ("folder", "snippet", "device", "name", "limit", "offset")),
+    "list_vulnerability_protection_profiles": ("/config/security/v1/vulnerability-protection-profiles", ("folder", "snippet", "device", "name", "limit", "offset")),
+    "list_url_filtering_profiles": ("/config/security/v1/url-filtering-profiles", ("folder", "snippet", "device", "name", "limit", "offset")),
+    "list_file_blocking_profiles": ("/config/security/v1/file-blocking-profiles", ("folder", "snippet", "device", "name", "limit", "offset")),
+    "list_wildfire_anti_virus_profiles": ("/config/security/v1/wildfire-anti-virus-profiles", ("folder", "snippet", "device", "name", "limit", "offset")),
+    "list_dns_security_profiles": ("/config/security/v1/dns-security-profiles", ("folder", "snippet", "device", "name", "limit", "offset")),
+    "list_dos_protection_profiles": ("/config/security/v1/dos-protection-profiles", ("folder", "snippet", "device", "name", "limit", "offset")),
+    "list_security_profile_groups": ("/config/security/v1/profile-groups", ("folder", "snippet", "device", "name", "limit", "offset")),
+    "list_decryption_profiles": ("/config/security/v1/decryption-profiles", ("folder", "snippet", "device", "name", "limit", "offset")),
+    "list_zone_protection_profiles": ("/config/security/v1/zone-protection-profiles", ("folder", "snippet", "device", "name", "limit", "offset")),
 }
 
 # Get-by-ID operations: tool_name -> (path_template, tuple_of_param_keys)
@@ -46,6 +57,17 @@ _GET_BY_ID_TOOLS: dict[str, tuple[str, tuple[str, ...]]] = {
     "get_decryption_rule": ("/config/security/v1/decryption-rules/{id}", ("id", "folder", "snippet", "device")),
     "get_app_override_rule": ("/config/security/v1/app-override-rules/{id}", ("id", "folder", "snippet", "device")),
     "get_dos_protection_rule": ("/config/security/v1/dos-protection-rules/{id}", ("id", "folder", "snippet", "device")),
+    # Security Profiles (Read-Only)
+    "get_anti_spyware_profile": ("/config/security/v1/anti-spyware-profiles/{id}", ("id", "folder", "snippet", "device")),
+    "get_vulnerability_protection_profile": ("/config/security/v1/vulnerability-protection-profiles/{id}", ("id", "folder", "snippet", "device")),
+    "get_url_filtering_profile": ("/config/security/v1/url-filtering-profiles/{id}", ("id", "folder", "snippet", "device")),
+    "get_file_blocking_profile": ("/config/security/v1/file-blocking-profiles/{id}", ("id", "folder", "snippet", "device")),
+    "get_wildfire_anti_virus_profile": ("/config/security/v1/wildfire-anti-virus-profiles/{id}", ("id", "folder", "snippet", "device")),
+    "get_dns_security_profile": ("/config/security/v1/dns-security-profiles/{id}", ("id", "folder", "snippet", "device")),
+    "get_dos_protection_profile": ("/config/security/v1/dos-protection-profiles/{id}", ("id", "folder", "snippet", "device")),
+    "get_security_profile_group": ("/config/security/v1/profile-groups/{id}", ("id", "folder", "snippet", "device")),
+    "get_decryption_profile": ("/config/security/v1/decryption-profiles/{id}", ("id", "folder", "snippet", "device")),
+    "get_zone_protection_profile": ("/config/security/v1/zone-protection-profiles/{id}", ("id", "folder", "snippet", "device")),
 }
 
 

@@ -233,3 +233,129 @@ class TestSecurityRulesTools:
         mock_rest_client.return_value = (200, {"id": "dos-1"})
         result = call("get_dos_protection_rule", {"id": "dos-1"})
         assert result["id"] == "dos-1"
+
+
+class TestSecurityProfilesTools:
+    """Test Security Profiles read-only tools (20 tools = 10 types × 2 operations)."""
+
+    # Test one representative sample per profile type (smoke tests for brevity)
+
+    def test_list_anti_spyware_profiles(self, mock_rest_client):
+        """list_anti_spyware_profiles: smoke test."""
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_anti_spyware_profiles", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_anti_spyware_profile(self, mock_rest_client):
+        """get_anti_spyware_profile: smoke test."""
+        mock_rest_client.return_value = (200, {"id": "asp-1"})
+        result = call("get_anti_spyware_profile", {"id": "asp-1"})
+        assert result["id"] == "asp-1"
+
+    def test_list_vulnerability_protection_profiles(self, mock_rest_client):
+        """list_vulnerability_protection_profiles: smoke test."""
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_vulnerability_protection_profiles", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_vulnerability_protection_profile(self, mock_rest_client):
+        """get_vulnerability_protection_profile: smoke test."""
+        mock_rest_client.return_value = (200, {"id": "vpp-1"})
+        result = call("get_vulnerability_protection_profile", {"id": "vpp-1"})
+        assert result["id"] == "vpp-1"
+
+    def test_list_url_filtering_profiles(self, mock_rest_client):
+        """list_url_filtering_profiles: smoke test."""
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_url_filtering_profiles", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_url_filtering_profile(self, mock_rest_client):
+        """get_url_filtering_profile: smoke test."""
+        mock_rest_client.return_value = (200, {"id": "ufp-1"})
+        result = call("get_url_filtering_profile", {"id": "ufp-1"})
+        assert result["id"] == "ufp-1"
+
+    def test_list_file_blocking_profiles(self, mock_rest_client):
+        """list_file_blocking_profiles: smoke test."""
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_file_blocking_profiles", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_file_blocking_profile(self, mock_rest_client):
+        """get_file_blocking_profile: smoke test."""
+        mock_rest_client.return_value = (200, {"id": "fbp-1"})
+        result = call("get_file_blocking_profile", {"id": "fbp-1"})
+        assert result["id"] == "fbp-1"
+
+    def test_list_wildfire_anti_virus_profiles(self, mock_rest_client):
+        """list_wildfire_anti_virus_profiles: smoke test."""
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_wildfire_anti_virus_profiles", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_wildfire_anti_virus_profile(self, mock_rest_client):
+        """get_wildfire_anti_virus_profile: smoke test."""
+        mock_rest_client.return_value = (200, {"id": "wfav-1"})
+        result = call("get_wildfire_anti_virus_profile", {"id": "wfav-1"})
+        assert result["id"] == "wfav-1"
+
+    def test_list_dns_security_profiles(self, mock_rest_client):
+        """list_dns_security_profiles: smoke test."""
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_dns_security_profiles", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_dns_security_profile(self, mock_rest_client):
+        """get_dns_security_profile: smoke test."""
+        mock_rest_client.return_value = (200, {"id": "dsp-1"})
+        result = call("get_dns_security_profile", {"id": "dsp-1"})
+        assert result["id"] == "dsp-1"
+
+    def test_list_dos_protection_profiles(self, mock_rest_client):
+        """list_dos_protection_profiles: smoke test."""
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_dos_protection_profiles", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_dos_protection_profile(self, mock_rest_client):
+        """get_dos_protection_profile: smoke test."""
+        mock_rest_client.return_value = (200, {"id": "dpp-1"})
+        result = call("get_dos_protection_profile", {"id": "dpp-1"})
+        assert result["id"] == "dpp-1"
+
+    def test_list_security_profile_groups(self, mock_rest_client):
+        """list_security_profile_groups: smoke test."""
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_security_profile_groups", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_security_profile_group(self, mock_rest_client):
+        """get_security_profile_group: smoke test."""
+        mock_rest_client.return_value = (200, {"id": "spg-1"})
+        result = call("get_security_profile_group", {"id": "spg-1"})
+        assert result["id"] == "spg-1"
+
+    def test_list_decryption_profiles(self, mock_rest_client):
+        """list_decryption_profiles: smoke test."""
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_decryption_profiles", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_decryption_profile(self, mock_rest_client):
+        """get_decryption_profile: smoke test."""
+        mock_rest_client.return_value = (200, {"id": "dp-1"})
+        result = call("get_decryption_profile", {"id": "dp-1"})
+        assert result["id"] == "dp-1"
+
+    def test_list_zone_protection_profiles(self, mock_rest_client):
+        """list_zone_protection_profiles: smoke test."""
+        mock_rest_client.return_value = (200, {"data": []})
+        result = call("list_zone_protection_profiles", {"folder": "Shared"})
+        assert "data" in result
+
+    def test_get_zone_protection_profile(self, mock_rest_client):
+        """get_zone_protection_profile: smoke test."""
+        mock_rest_client.return_value = (200, {"id": "zpp-1"})
+        result = call("get_zone_protection_profile", {"id": "zpp-1"})
+        assert result["id"] == "zpp-1"
