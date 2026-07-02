@@ -42,6 +42,10 @@ _LIST_TOOLS: dict[str, tuple[str, tuple[str, ...]]] = {
     "list_jobs": ("/config/operations/v1/jobs", ("limit", "offset")),
     "list_config_versions": ("/config/operations/v1/config-versions", ("limit", "offset")),
     "get_running_config": ("/config/operations/v1/running-config", ()),
+    # IAM
+    "list_service_accounts": ("/iam/v1/service-accounts", ("limit", "offset")),
+    "list_roles": ("/iam/v1/roles", ("limit", "offset")),
+    "list_access_policies": ("/iam/v1/access-policies", ("limit", "offset")),
 }
 
 # Get-by-ID operations: tool_name -> (path_template, tuple_of_param_keys)
@@ -75,6 +79,9 @@ _GET_BY_ID_TOOLS: dict[str, tuple[str, tuple[str, ...]]] = {
     # Operations
     "get_job": ("/config/operations/v1/jobs/{id}", ("id",)),
     "get_config_version": ("/config/operations/v1/config-versions/{version}", ("version",)),
+    # IAM
+    "get_service_account": ("/iam/v1/service-accounts/{id}", ("id",)),
+    "get_role": ("/iam/v1/roles/{id}", ("id",)),
 }
 
 

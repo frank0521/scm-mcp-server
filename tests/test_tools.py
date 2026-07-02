@@ -405,3 +405,43 @@ class TestOperationsTools:
 
         mock_rest_client.assert_called_once_with("GET", "/config/operations/v1/running-config", params={})
         assert "config" in result
+
+
+class TestIAMTools:
+    """Test IAM read-only tools (5 tools)."""
+
+    def test_list_service_accounts_success(self, mock_rest_client):
+        """list_service_accounts: success case."""
+        mock_rest_client.return_value = (200, {"data": [{"id": "sa-1", "name": "test-sa"}], "total": 1})
+
+        result = call("list_service_accounts", {"limit": 50, "offset": 0})
+
+        mock_rest_client.assert_called_once_with("GET", "/iam/v1/service-accounts", params={"limit": 50, "offset": 0})
+        assert result["total"] == 1
+
+    def test_get_service_account_success(self, mock_rest_client):
+        """get_service_account: success case."""
+        mock_rest_client.return_value = (200, {"id": "sa-123", "name": "prod-sa"})
+
+        result = call("get_service_account", {"id": "sa-123"})
+
+        mock_rest_client.assert_called_once_with("GET", "/iam/v1/service-accounts/sa-123", params={})
+        assert result["name"] == "prod-sa"
+
+    def test_list_roles(self, mock_rest_client):
+        """list_roles: smoke test."""
+        mock_rest_client.return_value = (200, {"data": [{"id": "role-1"}]})
+        result = call("list_roles", {})
+        assert "data" in result
+
+    def test_get_role(self, mock_rest_client):
+        """get_role: smoke test."""
+        mock_rest_client.return_value = (200, {"id": "role-42"})
+        result = call("get_role", {"id": "role-42"})
+        assert result["id"] == "role-42"
+
+    def test_list_access_policies(self, mock_rest_client):
+        """list_access_policies: smoke test (no get operation)."""
+        mock_rest_client.return_value = (200, {"data": [{"id": "policy-1"}]})
+        result = call("list_access_policies", {"limit": 100})
+        assert "data" in result
