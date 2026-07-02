@@ -1,18 +1,18 @@
 """Configuration loader for SCM MCP Server.
 
-Reads 5 environment variables required for SCM API access:
-- SCM_BASE_URL: SCM API base URL (optional, has default)
-- SCM_AUTH_URL: OAuth2 authentication URL (optional, has default)
-- SCM_CLIENT_ID: OAuth2 client ID (required)
-- SCM_CLIENT_SECRET: OAuth2 client secret (required)
-- SCM_TSG_ID: Tenant Service Group ID (required)
+Loading priority:
+1. Environment variables (SCM_CLIENT_ID, SCM_CLIENT_SECRET, SCM_TSG_ID)
+2. Encrypted credentials file (~/.scm-mcp/credentials.enc)
+
+If env vars are set, they take precedence. Otherwise falls back to the
+encrypted file (requires SCM_MASTER_KEY env or interactive passphrase).
 """
 
 import os
 
 
 class Config:
-    """Configuration singleton loaded from environment variables."""
+    """Configuration loaded from env vars or encrypted credentials."""
 
     # API URLs (with defaults)
     BASE_URL: str = os.getenv("SCM_BASE_URL", "https://api.strata.paloaltonetworks.com")
@@ -23,13 +23,30 @@ class Config:
     CLIENT_SECRET: str | None = os.getenv("SCM_CLIENT_SECRET")
     TSG_ID: str | None = os.getenv("SCM_TSG_ID")
 
+    _loaded_from_encrypted: bool = False
+
     @classmethod
     def validate(cls) -> None:
-        """Validate that all required environment variables are set.
+        """Validate credentials are available. Falls back to encrypted file.
 
         Raises:
-            RuntimeError: If any required variable is missing.
+            RuntimeError: If credentials are unavailable from all sources.
         """
+        if cls.CLIENT_ID and cls.CLIENT_SECRET and cls.TSG_ID:
+            return
+
+        # Try encrypted credentials fallback
+        try:
+            from .secrets import load_credentials, CREDENTIALS_FILE
+            if CREDENTIALS_FILE.exists():
+                creds = load_credentials()
+                cls.CLIENT_ID = cls.CLIENT_ID or creds.get("SCM_CLIENT_ID")
+                cls.CLIENT_SECRET = cls.CLIENT_SECRET or creds.get("SCM_CLIENT_SECRET")
+                cls.TSG_ID = cls.TSG_ID or creds.get("SCM_TSG_ID")
+                cls._loaded_from_encrypted = True
+        except Exception:
+            pass
+
         missing = []
         if not cls.CLIENT_ID:
             missing.append("SCM_CLIENT_ID")
@@ -39,4 +56,8 @@ class Config:
             missing.append("SCM_TSG_ID")
 
         if missing:
-            raise RuntimeError(f"缺少必填环境变量: {', '.join(missing)}")
+            raise RuntimeError(
+                f"缺少必填环境变量: {', '.join(missing)}\n"
+                "提示: 可通过 scm-mcp-secrets set 存储加密凭据，"
+                "或设置 SCM_MASTER_KEY 环境变量自动解密"
+            )
