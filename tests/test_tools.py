@@ -359,3 +359,49 @@ class TestSecurityProfilesTools:
         mock_rest_client.return_value = (200, {"id": "zpp-1"})
         result = call("get_zone_protection_profile", {"id": "zpp-1"})
         assert result["id"] == "zpp-1"
+
+
+class TestOperationsTools:
+    """Test Operations read-only tools (5 tools)."""
+
+    def test_list_jobs_success(self, mock_rest_client):
+        """list_jobs: success case."""
+        mock_rest_client.return_value = (200, {"data": [{"id": "job-1", "status": "completed"}], "total": 1})
+
+        result = call("list_jobs", {"limit": 20})
+
+        mock_rest_client.assert_called_once_with("GET", "/config/operations/v1/jobs", params={"limit": 20})
+        assert result["total"] == 1
+
+    def test_get_job_success(self, mock_rest_client):
+        """get_job: success case."""
+        mock_rest_client.return_value = (200, {"id": "job-123", "status": "pending"})
+
+        result = call("get_job", {"id": "job-123"})
+
+        mock_rest_client.assert_called_once_with("GET", "/config/operations/v1/jobs/job-123", params={})
+        assert result["status"] == "pending"
+
+    def test_list_config_versions(self, mock_rest_client):
+        """list_config_versions: smoke test."""
+        mock_rest_client.return_value = (200, {"data": [{"version": "v1"}]})
+        result = call("list_config_versions", {"limit": 10})
+        assert "data" in result
+
+    def test_get_config_version_success(self, mock_rest_client):
+        """get_config_version: success with 'version' path param."""
+        mock_rest_client.return_value = (200, {"version": "v42", "timestamp": "2026-07-02T00:00:00Z"})
+
+        result = call("get_config_version", {"version": "v42"})
+
+        mock_rest_client.assert_called_once_with("GET", "/config/operations/v1/config-versions/v42", params={})
+        assert result["version"] == "v42"
+
+    def test_get_running_config_success(self, mock_rest_client):
+        """get_running_config: no path params, only query params."""
+        mock_rest_client.return_value = (200, {"config": {...}})
+
+        result = call("get_running_config", {})
+
+        mock_rest_client.assert_called_once_with("GET", "/config/operations/v1/running-config", params={})
+        assert "config" in result

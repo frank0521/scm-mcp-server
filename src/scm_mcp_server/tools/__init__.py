@@ -38,6 +38,10 @@ _LIST_TOOLS: dict[str, tuple[str, tuple[str, ...]]] = {
     "list_security_profile_groups": ("/config/security/v1/profile-groups", ("folder", "snippet", "device", "name", "limit", "offset")),
     "list_decryption_profiles": ("/config/security/v1/decryption-profiles", ("folder", "snippet", "device", "name", "limit", "offset")),
     "list_zone_protection_profiles": ("/config/security/v1/zone-protection-profiles", ("folder", "snippet", "device", "name", "limit", "offset")),
+    # Operations
+    "list_jobs": ("/config/operations/v1/jobs", ("limit", "offset")),
+    "list_config_versions": ("/config/operations/v1/config-versions", ("limit", "offset")),
+    "get_running_config": ("/config/operations/v1/running-config", ()),
 }
 
 # Get-by-ID operations: tool_name -> (path_template, tuple_of_param_keys)
@@ -68,6 +72,9 @@ _GET_BY_ID_TOOLS: dict[str, tuple[str, tuple[str, ...]]] = {
     "get_security_profile_group": ("/config/security/v1/profile-groups/{id}", ("id", "folder", "snippet", "device")),
     "get_decryption_profile": ("/config/security/v1/decryption-profiles/{id}", ("id", "folder", "snippet", "device")),
     "get_zone_protection_profile": ("/config/security/v1/zone-protection-profiles/{id}", ("id", "folder", "snippet", "device")),
+    # Operations
+    "get_job": ("/config/operations/v1/jobs/{id}", ("id",)),
+    "get_config_version": ("/config/operations/v1/config-versions/{version}", ("version",)),
 }
 
 
