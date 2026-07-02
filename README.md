@@ -37,7 +37,24 @@ git clone <repository-url> scm-mcp-server
 cd scm-mcp-server
 ```
 
-### 2. Install Dependencies
+### 2. Create Virtual Environment (Recommended)
+
+**macOS/Linux**:
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+**Windows**:
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+**Why virtual environment?**  
+On macOS with system Python (3.14+), PEP 668 requires virtual environments to prevent system package conflicts.
+
+### 3. Install Dependencies
 
 ```bash
 pip install -e .
@@ -50,7 +67,7 @@ This installs the package in editable mode with all required dependencies:
 - `pydantic` - Data validation
 - `python-dotenv` - Environment variable management
 
-### 3. Configure Environment Variables
+### 4. Configure Environment Variables
 
 Create a `.env` file or export variables in your shell:
 
@@ -76,11 +93,12 @@ cp .env.example .env
 
 Edit `~/.claude/claude_desktop_config.json`:
 
+**Option 1: Using Virtual Environment (Recommended)**
 ```json
 {
   "mcpServers": {
     "scm": {
-      "command": "python",
+      "command": "/Users/YOUR_USERNAME/vibe-coding/scm-mcp-server/venv/bin/python",
       "args": ["-m", "scm_mcp.server"],
       "env": {
         "SCM_CLIENT_ID": "your-client-id",
@@ -92,7 +110,27 @@ Edit `~/.claude/claude_desktop_config.json`:
 }
 ```
 
-**Note**: Replace `your-client-id`, `your-client-secret`, and `your-tsg-id` with your actual credentials.
+**Option 2: Using System Python (if no virtual environment)**
+```json
+{
+  "mcpServers": {
+    "scm": {
+      "command": "python3",
+      "args": ["-m", "scm_mcp.server"],
+      "env": {
+        "SCM_CLIENT_ID": "your-client-id",
+        "SCM_CLIENT_SECRET": "your-client-secret",
+        "SCM_TSG_ID": "your-tsg-id"
+      }
+    }
+  }
+}
+```
+
+**Note**: 
+- Replace `YOUR_USERNAME` with your actual username
+- Replace `your-client-id`, `your-client-secret`, and `your-tsg-id` with your actual credentials
+- Use absolute path to venv Python for reliability
 
 ### Cursor
 
