@@ -60,6 +60,7 @@ def list_schema(
 
     Args:
         required_container: If True, at least one of folder/snippet/device is required.
+            Validation is delegated to the SCM API.
         additional_params: Extra parameters to merge into properties.
 
     Returns:
@@ -82,14 +83,6 @@ def list_schema(
         "properties": properties,
     }
 
-    if required_container:
-        # At least one of folder/snippet/device must be provided
-        schema["oneOf"] = [
-            {"required": ["folder"]},
-            {"required": ["snippet"]},
-            {"required": ["device"]},
-        ]
-
     return schema
 
 
@@ -104,6 +97,7 @@ def get_by_id_schema(
     Args:
         id_param_name: Name of the ID parameter (default: "id", alternative: "version").
         required_container: If True, folder/snippet/device is required alongside ID.
+            Validation is delegated to the SCM API.
         additional_params: Extra parameters to merge into properties.
 
     Returns:
@@ -127,14 +121,6 @@ def get_by_id_schema(
         "required": [id_param_name],
     }
 
-    if required_container:
-        # ID + one of folder/snippet/device
-        schema["oneOf"] = [
-            {"required": [id_param_name, "folder"]},
-            {"required": [id_param_name, "snippet"]},
-            {"required": [id_param_name, "device"]},
-        ]
-
     return schema
 
 
@@ -149,12 +135,6 @@ def create_schema(*, has_container: bool = True) -> dict[str, Any]:
         },
         "additionalProperties": True,
     }
-    if has_container:
-        schema["oneOf"] = [
-            {"required": ["folder"]},
-            {"required": ["snippet"]},
-            {"required": ["device"]},
-        ]
     return schema
 
 
@@ -171,12 +151,6 @@ def update_schema(*, has_container: bool = True) -> dict[str, Any]:
         "required": ["id"],
         "additionalProperties": True,
     }
-    if has_container:
-        schema["oneOf"] = [
-            {"required": ["id", "folder"]},
-            {"required": ["id", "snippet"]},
-            {"required": ["id", "device"]},
-        ]
     return schema
 
 
@@ -192,12 +166,6 @@ def delete_schema(*, has_container: bool = True) -> dict[str, Any]:
         },
         "required": ["id"],
     }
-    if has_container:
-        schema["oneOf"] = [
-            {"required": ["id", "folder"]},
-            {"required": ["id", "snippet"]},
-            {"required": ["id", "device"]},
-        ]
     return schema
 
 
