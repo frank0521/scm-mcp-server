@@ -191,99 +191,420 @@ When multiple OpenAPI files define the same operationId, the parser uses the **l
 
 ## MCP Tools Mapping
 
-### Auth Tools
+**Total Tools**: 168 (Batch 1: 98, Batch 2: 70)
 
-#### `scm_auth_get_token`
-- **OpenAPI**: `auth/AuthService.yaml` → POST `/auth/v1/oauth2/access_token`
-- **Input**: None (uses environment variables)
-- **Output**: `{access_token: string, expires_in: number, token_type: string}`
-- **Note**: Primarily for testing; automatic token management is built-in
+### Tool Naming Convention
+- **Format**: `{action}_{resource}` (lowercase_underscore)
+- **Actions**: `list`, `get`, `create`, `update`, `delete`, `move`
+- **Write operations** marked with "⚠️ 写操作" in description
 
-### IAM Tools
+### Organization
+- **Batch 1 (MVP)**: Core functionality - Objects, Security Rules, Security Profiles (read-only), Operations, IAM (98 tools)
+- **Batch 2 (Extended)**: Extended objects and Security Profiles (write operations) (70 tools)
 
-#### `scm_iam_list_service_accounts`
-- **OpenAPI**: `iam/ServiceAccounts.yaml` → GET `/iam/v1/service-accounts`
-- **Input**: `{limit?: number, offset?: number, filter?: string}`
-- **Output**: `{data: ServiceAccount[], total: number, offset: number, limit: number}`
+---
 
-#### `scm_iam_get_service_account`
-- **OpenAPI**: `iam/ServiceAccounts.yaml` → GET `/iam/v1/service-accounts/{id}`
-- **Input**: `{id: string}`
-- **Output**: `ServiceAccount`
+## Batch 1: MVP Tools (98 tools)
 
-#### `scm_iam_create_service_account`
-- **OpenAPI**: `iam/ServiceAccounts.yaml` → POST `/iam/v1/service-accounts`
-- **Input**: Schema from OpenAPI `requestBody` (name, description, etc.)
-- **Output**: Created `ServiceAccount`
+### 1.1 Objects Core (35 tools)
 
-#### `scm_iam_list_access_policies`
-- **OpenAPI**: `iam/AccessPolicies.yaml` → GET `/iam/v1/access-policies`
-- **Input**: `{limit?: number, offset?: number}`
-- **Output**: `{data: AccessPolicy[]}`
+#### Addresses (5 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_addresses` | GET | `/config/objects/v1/addresses` | List address objects |
+| `get_address` | GET | `/config/objects/v1/addresses/{id}` | Get address object by ID |
+| `create_address` | POST | `/config/objects/v1/addresses` | ⚠️ 写操作 Create address object |
+| `update_address` | PUT | `/config/objects/v1/addresses/{id}` | ⚠️ 写操作 Update address object |
+| `delete_address` | DELETE | `/config/objects/v1/addresses/{id}` | ⚠️ 写操作 Delete address object |
 
-#### `scm_iam_create_access_policy`
-- **OpenAPI**: `iam/AccessPolicies.yaml` → POST `/iam/v1/access-policies`
-- **Input**: Schema from OpenAPI (principal, resource, actions, etc.)
-- **Output**: Created `AccessPolicy`
+#### Address Groups (5 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_address_groups` | GET | `/config/objects/v1/address-groups` | List address groups |
+| `get_address_group` | GET | `/config/objects/v1/address-groups/{id}` | Get address group by ID |
+| `create_address_group` | POST | `/config/objects/v1/address-groups` | ⚠️ 写操作 Create address group |
+| `update_address_group` | PUT | `/config/objects/v1/address-groups/{id}` | ⚠️ 写操作 Update address group |
+| `delete_address_group` | DELETE | `/config/objects/v1/address-groups/{id}` | ⚠️ 写操作 Delete address group |
 
-### SASE Config Tools
+#### Services (5 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_services` | GET | `/config/objects/v1/services` | List service objects |
+| `get_service` | GET | `/config/objects/v1/services/{id}` | Get service object by ID |
+| `create_service` | POST | `/config/objects/v1/services` | ⚠️ 写操作 Create service object |
+| `update_service` | PUT | `/config/objects/v1/services/{id}` | ⚠️ 写操作 Update service object |
+| `delete_service` | DELETE | `/config/objects/v1/services/{id}` | ⚠️ 写操作 Delete service object |
 
-#### `scm_sase_list_security_rules`
-- **OpenAPI**: `config/sase/security/security-services-R2-2026.yaml` → GET `/config/security/v1/security-rules`
-- **Input**: `{folder?: string, limit?: number, offset?: number}`
-- **Output**: `{data: SecurityRule[], total: number}`
+#### Service Groups (5 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_service_groups` | GET | `/config/objects/v1/service-groups` | List service groups |
+| `get_service_group` | GET | `/config/objects/v1/service-groups/{id}` | Get service group by ID |
+| `create_service_group` | POST | `/config/objects/v1/service-groups` | ⚠️ 写操作 Create service group |
+| `update_service_group` | PUT | `/config/objects/v1/service-groups/{id}` | ⚠️ 写操作 Update service group |
+| `delete_service_group` | DELETE | `/config/objects/v1/service-groups/{id}` | ⚠️ 写操作 Delete service group |
 
-#### `scm_sase_get_security_rule`
-- **OpenAPI**: Same file → GET `/config/security/v1/security-rules/{id}`
-- **Input**: `{id: string, folder?: string}`
-- **Output**: `SecurityRule`
+#### Tags (5 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_tags` | GET | `/config/objects/v1/tags` | List tag objects |
+| `get_tag` | GET | `/config/objects/v1/tags/{id}` | Get tag object by ID |
+| `create_tag` | POST | `/config/objects/v1/tags` | ⚠️ 写操作 Create tag object |
+| `update_tag` | PUT | `/config/objects/v1/tags/{id}` | ⚠️ 写操作 Update tag object |
+| `delete_tag` | DELETE | `/config/objects/v1/tags/{id}` | ⚠️ 写操作 Delete tag object |
 
-#### `scm_sase_create_security_rule`
-- **OpenAPI**: Same file → POST `/config/security/v1/security-rules`
-- **Input**: Schema from OpenAPI (name, source, destination, action, etc.)
-- **Output**: Created `SecurityRule`
+#### Application Groups (5 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_application_groups` | GET | `/config/objects/v1/application-groups` | List application groups |
+| `get_application_group` | GET | `/config/objects/v1/application-groups/{id}` | Get application group by ID |
+| `create_application_group` | POST | `/config/objects/v1/application-groups` | ⚠️ 写操作 Create application group |
+| `update_application_group` | PUT | `/config/objects/v1/application-groups/{id}` | ⚠️ 写操作 Update application group |
+| `delete_application_group` | DELETE | `/config/objects/v1/application-groups/{id}` | ⚠️ 写操作 Delete application group |
 
-#### `scm_sase_update_security_rule`
-- **OpenAPI**: Same file → PUT `/config/security/v1/security-rules/{id}`
-- **Input**: `{id: string, ...updates}`
-- **Output**: Updated `SecurityRule`
+#### External Dynamic Lists (5 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_external_dynamic_lists` | GET | `/config/objects/v1/external-dynamic-lists` | List external dynamic lists |
+| `get_external_dynamic_list` | GET | `/config/objects/v1/external-dynamic-lists/{id}` | Get external dynamic list by ID |
+| `create_external_dynamic_list` | POST | `/config/objects/v1/external-dynamic-lists` | ⚠️ 写操作 Create external dynamic list |
+| `update_external_dynamic_list` | PUT | `/config/objects/v1/external-dynamic-lists/{id}` | ⚠️ 写操作 Update external dynamic list |
+| `delete_external_dynamic_list` | DELETE | `/config/objects/v1/external-dynamic-lists/{id}` | ⚠️ 写操作 Delete external dynamic list |
 
-#### `scm_sase_delete_security_rule`
-- **OpenAPI**: Same file → DELETE `/config/security/v1/security-rules/{id}`
-- **Input**: `{id: string}`
-- **Output**: `{success: boolean}`
+---
 
-#### `scm_sase_list_address_objects`
-- **OpenAPI**: `config/sase/objects/objects-june.yaml` → GET `/config/objects/v1/addresses`
-- **Input**: `{folder?: string, limit?: number, offset?: number}`
-- **Output**: `{data: AddressObject[]}`
+### 1.2 Security Rules (23 tools)
 
-#### `scm_sase_create_address_object`
-- **OpenAPI**: Same file → POST `/config/objects/v1/addresses`
-- **Input**: Schema from OpenAPI (name, ip_netmask?, fqdn?, description?, etc.)
-- **Output**: Created `AddressObject`
+#### Security Rules (6 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_security_rules` | GET | `/config/security/v1/security-rules` | List security rules |
+| `get_security_rule` | GET | `/config/security/v1/security-rules/{id}` | Get security rule by ID |
+| `create_security_rule` | POST | `/config/security/v1/security-rules` | ⚠️ 写操作 Create security rule |
+| `update_security_rule` | PUT | `/config/security/v1/security-rules/{id}` | ⚠️ 写操作 Update security rule |
+| `delete_security_rule` | DELETE | `/config/security/v1/security-rules/{id}` | ⚠️ 写操作 Delete security rule |
+| `move_security_rule` | POST | `/config/security/v1/security-rules/{id}:move` | ⚠️ 写操作 Move security rule position |
 
-### Cloud NGFW Config Tools
+#### Decryption Rules (6 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_decryption_rules` | GET | `/config/security/v1/decryption-rules` | List decryption rules |
+| `get_decryption_rule` | GET | `/config/security/v1/decryption-rules/{id}` | Get decryption rule by ID |
+| `create_decryption_rule` | POST | `/config/security/v1/decryption-rules` | ⚠️ 写操作 Create decryption rule |
+| `update_decryption_rule` | PUT | `/config/security/v1/decryption-rules/{id}` | ⚠️ 写操作 Update decryption rule |
+| `delete_decryption_rule` | DELETE | `/config/security/v1/decryption-rules/{id}` | ⚠️ 写操作 Delete decryption rule |
+| `move_decryption_rule` | POST | `/config/security/v1/decryption-rules/{id}:move` | ⚠️ 写操作 Move decryption rule position |
 
-Similar structure to SASE tools, but using `config/cloudngfw/` OpenAPI specs:
-- `scm_cloudngfw_list_security_rules`
-- `scm_cloudngfw_create_security_rule`
-- `scm_cloudngfw_list_address_objects`
-- etc.
+#### App Override Rules (6 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_app_override_rules` | GET | `/config/security/v1/app-override-rules` | List app override rules |
+| `get_app_override_rule` | GET | `/config/security/v1/app-override-rules/{id}` | Get app override rule by ID |
+| `create_app_override_rule` | POST | `/config/security/v1/app-override-rules` | ⚠️ 写操作 Create app override rule |
+| `update_app_override_rule` | PUT | `/config/security/v1/app-override-rules/{id}` | ⚠️ 写操作 Update app override rule |
+| `delete_app_override_rule` | DELETE | `/config/security/v1/app-override-rules/{id}` | ⚠️ 写操作 Delete app override rule |
+| `move_app_override_rule` | POST | `/config/security/v1/app-override-rules/{id}:move` | ⚠️ 写操作 Move app override rule position |
 
-### Subscription Tools
+#### DoS Protection Rules (5 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_dos_protection_rules` | GET | `/config/security/v1/dos-protection-rules` | List DoS protection rules |
+| `get_dos_protection_rule` | GET | `/config/security/v1/dos-protection-rules/{id}` | Get DoS protection rule by ID |
+| `create_dos_protection_rule` | POST | `/config/security/v1/dos-protection-rules` | ⚠️ 写操作 Create DoS protection rule |
+| `update_dos_protection_rule` | PUT | `/config/security/v1/dos-protection-rules/{id}` | ⚠️ 写操作 Update DoS protection rule |
+| `delete_dos_protection_rule` | DELETE | `/config/security/v1/dos-protection-rules/{id}` | ⚠️ 写操作 Delete DoS protection rule |
 
-#### `scm_subscription_list_licenses`
-- **OpenAPI**: `subscription/Licenses.yaml` → GET `/subscription/v1/licenses`
-- **Input**: `{limit?: number, offset?: number}`
-- **Output**: `{data: License[]}`
+---
 
-### Tenancy Tools
+### 1.3 Security Profiles (Read-Only) (20 tools)
 
-#### `scm_tenancy_list_tsgs`
-- **OpenAPI**: `tenancy/TenantServiceGroup.yaml` → GET `/tenancy/v1/tenant-service-groups`
-- **Input**: `{limit?: number, offset?: number}`
-- **Output**: `{data: TenantServiceGroup[]}`
+#### Anti-Spyware Profiles (2 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_anti_spyware_profiles` | GET | `/config/security/v1/anti-spyware-profiles` | List anti-spyware profiles |
+| `get_anti_spyware_profile` | GET | `/config/security/v1/anti-spyware-profiles/{id}` | Get anti-spyware profile by ID |
+
+#### Vulnerability Protection Profiles (2 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_vulnerability_protection_profiles` | GET | `/config/security/v1/vulnerability-protection-profiles` | List vulnerability protection profiles |
+| `get_vulnerability_protection_profile` | GET | `/config/security/v1/vulnerability-protection-profiles/{id}` | Get vulnerability protection profile by ID |
+
+#### URL Filtering Profiles (2 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_url_filtering_profiles` | GET | `/config/security/v1/url-filtering-profiles` | List URL filtering profiles |
+| `get_url_filtering_profile` | GET | `/config/security/v1/url-filtering-profiles/{id}` | Get URL filtering profile by ID |
+
+#### File Blocking Profiles (2 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_file_blocking_profiles` | GET | `/config/security/v1/file-blocking-profiles` | List file blocking profiles |
+| `get_file_blocking_profile` | GET | `/config/security/v1/file-blocking-profiles/{id}` | Get file blocking profile by ID |
+
+#### Wildfire Anti-Virus Profiles (2 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_wildfire_anti_virus_profiles` | GET | `/config/security/v1/wildfire-anti-virus-profiles` | List Wildfire anti-virus profiles |
+| `get_wildfire_anti_virus_profile` | GET | `/config/security/v1/wildfire-anti-virus-profiles/{id}` | Get Wildfire anti-virus profile by ID |
+
+#### DNS Security Profiles (2 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_dns_security_profiles` | GET | `/config/security/v1/dns-security-profiles` | List DNS security profiles |
+| `get_dns_security_profile` | GET | `/config/security/v1/dns-security-profiles/{id}` | Get DNS security profile by ID |
+
+#### DoS Protection Profiles (2 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_dos_protection_profiles` | GET | `/config/security/v1/dos-protection-profiles` | List DoS protection profiles |
+| `get_dos_protection_profile` | GET | `/config/security/v1/dos-protection-profiles/{id}` | Get DoS protection profile by ID |
+
+#### Security Profile Groups (2 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_security_profile_groups` | GET | `/config/security/v1/profile-groups` | List security profile groups |
+| `get_security_profile_group` | GET | `/config/security/v1/profile-groups/{id}` | Get security profile group by ID |
+
+#### Decryption Profiles (2 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_decryption_profiles` | GET | `/config/security/v1/decryption-profiles` | List decryption profiles |
+| `get_decryption_profile` | GET | `/config/security/v1/decryption-profiles/{id}` | Get decryption profile by ID |
+
+#### Zone Protection Profiles (2 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_zone_protection_profiles` | GET | `/config/security/v1/zone-protection-profiles` | List zone protection profiles |
+| `get_zone_protection_profile` | GET | `/config/security/v1/zone-protection-profiles/{id}` | Get zone protection profile by ID |
+
+---
+
+### 1.4 Operations (8 tools)
+
+#### Jobs (2 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_jobs` | GET | `/config/operations/v1/jobs` | List configuration jobs |
+| `get_job` | GET | `/config/operations/v1/jobs/{id}` | Get job status by ID |
+
+#### Config Versions (2 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_config_versions` | GET | `/config/operations/v1/config-versions` | List configuration versions |
+| `get_config_version` | GET | `/config/operations/v1/config-versions/{version}` | Get specific config version |
+
+#### Candidate Config (2 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `push_candidate_config` | POST | `/config/operations/v1/config-versions:push` | ⚠️ 写操作 Push candidate config |
+| `load_candidate_config` | POST | `/config/operations/v1/config-versions/{version}:load` | ⚠️ 写操作 Load config version as candidate |
+
+#### Running Config (2 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `commit_config` | POST | `/config/operations/v1/jobs:commit` | ⚠️ 写操作 Commit candidate to running config |
+| `get_running_config` | GET | `/config/operations/v1/running-config` | Get current running config |
+
+---
+
+### 1.5 IAM (12 tools)
+
+#### Service Accounts (5 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_service_accounts` | GET | `/iam/v1/service-accounts` | List service accounts |
+| `get_service_account` | GET | `/iam/v1/service-accounts/{id}` | Get service account by ID |
+| `create_service_account` | POST | `/iam/v1/service-accounts` | ⚠️ 写操作 Create service account |
+| `update_service_account` | PUT | `/iam/v1/service-accounts/{id}` | ⚠️ 写操作 Update service account |
+| `delete_service_account` | DELETE | `/iam/v1/service-accounts/{id}` | ⚠️ 写操作 Delete service account |
+
+#### Roles (4 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_roles` | GET | `/iam/v1/roles` | List IAM roles |
+| `get_role` | GET | `/iam/v1/roles/{id}` | Get role by ID |
+| `create_role` | POST | `/iam/v1/roles` | ⚠️ 写操作 Create custom role |
+| `delete_role` | DELETE | `/iam/v1/roles/{id}` | ⚠️ 写操作 Delete custom role |
+
+#### Access Policies (3 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_access_policies` | GET | `/iam/v1/access-policies` | List access policies |
+| `create_access_policy` | POST | `/iam/v1/access-policies` | ⚠️ 写操作 Create access policy |
+| `delete_access_policy` | DELETE | `/iam/v1/access-policies/{id}` | ⚠️ 写操作 Delete access policy |
+
+---
+
+## Batch 2: Extended Tools (70 tools)
+
+### 2.1 Objects Extended (40 tools)
+
+#### Applications (2 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_applications` | GET | `/config/objects/v1/applications` | List application objects |
+| `get_application` | GET | `/config/objects/v1/applications/{id}` | Get application object by ID |
+
+#### Application Filters (5 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_application_filters` | GET | `/config/objects/v1/application-filters` | List application filters |
+| `get_application_filter` | GET | `/config/objects/v1/application-filters/{id}` | Get application filter by ID |
+| `create_application_filter` | POST | `/config/objects/v1/application-filters` | ⚠️ 写操作 Create application filter |
+| `update_application_filter` | PUT | `/config/objects/v1/application-filters/{id}` | ⚠️ 写操作 Update application filter |
+| `delete_application_filter` | DELETE | `/config/objects/v1/application-filters/{id}` | ⚠️ 写操作 Delete application filter |
+
+#### Schedules (5 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_schedules` | GET | `/config/objects/v1/schedules` | List schedule objects |
+| `get_schedule` | GET | `/config/objects/v1/schedules/{id}` | Get schedule object by ID |
+| `create_schedule` | POST | `/config/objects/v1/schedules` | ⚠️ 写操作 Create schedule object |
+| `update_schedule` | PUT | `/config/objects/v1/schedules/{id}` | ⚠️ 写操作 Update schedule object |
+| `delete_schedule` | DELETE | `/config/objects/v1/schedules/{id}` | ⚠️ 写操作 Delete schedule object |
+
+#### Regions (5 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_regions` | GET | `/config/objects/v1/regions` | List region objects |
+| `get_region` | GET | `/config/objects/v1/regions/{id}` | Get region object by ID |
+| `create_region` | POST | `/config/objects/v1/regions` | ⚠️ 写操作 Create region object |
+| `update_region` | PUT | `/config/objects/v1/regions/{id}` | ⚠️ 写操作 Update region object |
+| `delete_region` | DELETE | `/config/objects/v1/regions/{id}` | ⚠️ 写操作 Delete region object |
+
+#### HIP Objects (5 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_hip_objects` | GET | `/config/objects/v1/hip-objects` | List HIP objects |
+| `get_hip_object` | GET | `/config/objects/v1/hip-objects/{id}` | Get HIP object by ID |
+| `create_hip_object` | POST | `/config/objects/v1/hip-objects` | ⚠️ 写操作 Create HIP object |
+| `update_hip_object` | PUT | `/config/objects/v1/hip-objects/{id}` | ⚠️ 写操作 Update HIP object |
+| `delete_hip_object` | DELETE | `/config/objects/v1/hip-objects/{id}` | ⚠️ 写操作 Delete HIP object |
+
+#### HIP Profiles (5 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_hip_profiles` | GET | `/config/objects/v1/hip-profiles` | List HIP profiles |
+| `get_hip_profile` | GET | `/config/objects/v1/hip-profiles/{id}` | Get HIP profile by ID |
+| `create_hip_profile` | POST | `/config/objects/v1/hip-profiles` | ⚠️ 写操作 Create HIP profile |
+| `update_hip_profile` | PUT | `/config/objects/v1/hip-profiles/{id}` | ⚠️ 写操作 Update HIP profile |
+| `delete_hip_profile` | DELETE | `/config/objects/v1/hip-profiles/{id}` | ⚠️ 写操作 Delete HIP profile |
+
+#### Log Forwarding Profiles (5 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_log_forwarding_profiles` | GET | `/config/objects/v1/log-forwarding-profiles` | List log forwarding profiles |
+| `get_log_forwarding_profile` | GET | `/config/objects/v1/log-forwarding-profiles/{id}` | Get log forwarding profile by ID |
+| `create_log_forwarding_profile` | POST | `/config/objects/v1/log-forwarding-profiles` | ⚠️ 写操作 Create log forwarding profile |
+| `update_log_forwarding_profile` | PUT | `/config/objects/v1/log-forwarding-profiles/{id}` | ⚠️ 写操作 Update log forwarding profile |
+| `delete_log_forwarding_profile` | DELETE | `/config/objects/v1/log-forwarding-profiles/{id}` | ⚠️ 写操作 Delete log forwarding profile |
+
+#### HTTP Server Profiles (4 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_http_server_profiles` | GET | `/config/objects/v1/http-server-profiles` | List HTTP server profiles |
+| `get_http_server_profile` | GET | `/config/objects/v1/http-server-profiles/{id}` | Get HTTP server profile by ID |
+| `create_http_server_profile` | POST | `/config/objects/v1/http-server-profiles` | ⚠️ 写操作 Create HTTP server profile |
+| `delete_http_server_profile` | DELETE | `/config/objects/v1/http-server-profiles/{id}` | ⚠️ 写操作 Delete HTTP server profile |
+
+#### Syslog Server Profiles (4 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `list_syslog_server_profiles` | GET | `/config/objects/v1/syslog-server-profiles` | List syslog server profiles |
+| `get_syslog_server_profile` | GET | `/config/objects/v1/syslog-server-profiles/{id}` | Get syslog server profile by ID |
+| `create_syslog_server_profile` | POST | `/config/objects/v1/syslog-server-profiles` | ⚠️ 写操作 Create syslog server profile |
+| `delete_syslog_server_profile` | DELETE | `/config/objects/v1/syslog-server-profiles/{id}` | ⚠️ 写操作 Delete syslog server profile |
+
+---
+
+### 2.2 Security Profiles (Write Operations) (30 tools)
+
+#### Anti-Spyware Profiles (3 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `create_anti_spyware_profile` | POST | `/config/security/v1/anti-spyware-profiles` | ⚠️ 写操作 Create anti-spyware profile |
+| `update_anti_spyware_profile` | PUT | `/config/security/v1/anti-spyware-profiles/{id}` | ⚠️ 写操作 Update anti-spyware profile |
+| `delete_anti_spyware_profile` | DELETE | `/config/security/v1/anti-spyware-profiles/{id}` | ⚠️ 写操作 Delete anti-spyware profile |
+
+#### Vulnerability Protection Profiles (3 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `create_vulnerability_protection_profile` | POST | `/config/security/v1/vulnerability-protection-profiles` | ⚠️ 写操作 Create vulnerability protection profile |
+| `update_vulnerability_protection_profile` | PUT | `/config/security/v1/vulnerability-protection-profiles/{id}` | ⚠️ 写操作 Update vulnerability protection profile |
+| `delete_vulnerability_protection_profile` | DELETE | `/config/security/v1/vulnerability-protection-profiles/{id}` | ⚠️ 写操作 Delete vulnerability protection profile |
+
+#### URL Filtering Profiles (3 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `create_url_filtering_profile` | POST | `/config/security/v1/url-filtering-profiles` | ⚠️ 写操作 Create URL filtering profile |
+| `update_url_filtering_profile` | PUT | `/config/security/v1/url-filtering-profiles/{id}` | ⚠️ 写操作 Update URL filtering profile |
+| `delete_url_filtering_profile` | DELETE | `/config/security/v1/url-filtering-profiles/{id}` | ⚠️ 写操作 Delete URL filtering profile |
+
+#### File Blocking Profiles (3 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `create_file_blocking_profile` | POST | `/config/security/v1/file-blocking-profiles` | ⚠️ 写操作 Create file blocking profile |
+| `update_file_blocking_profile` | PUT | `/config/security/v1/file-blocking-profiles/{id}` | ⚠️ 写操作 Update file blocking profile |
+| `delete_file_blocking_profile` | DELETE | `/config/security/v1/file-blocking-profiles/{id}` | ⚠️ 写操作 Delete file blocking profile |
+
+#### Wildfire Anti-Virus Profiles (3 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `create_wildfire_anti_virus_profile` | POST | `/config/security/v1/wildfire-anti-virus-profiles` | ⚠️ 写操作 Create Wildfire anti-virus profile |
+| `update_wildfire_anti_virus_profile` | PUT | `/config/security/v1/wildfire-anti-virus-profiles/{id}` | ⚠️ 写操作 Update Wildfire anti-virus profile |
+| `delete_wildfire_anti_virus_profile` | DELETE | `/config/security/v1/wildfire-anti-virus-profiles/{id}` | ⚠️ 写操作 Delete Wildfire anti-virus profile |
+
+#### DNS Security Profiles (3 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `create_dns_security_profile` | POST | `/config/security/v1/dns-security-profiles` | ⚠️ 写操作 Create DNS security profile |
+| `update_dns_security_profile` | PUT | `/config/security/v1/dns-security-profiles/{id}` | ⚠️ 写操作 Update DNS security profile |
+| `delete_dns_security_profile` | DELETE | `/config/security/v1/dns-security-profiles/{id}` | ⚠️ 写操作 Delete DNS security profile |
+
+#### DoS Protection Profiles (3 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `create_dos_protection_profile` | POST | `/config/security/v1/dos-protection-profiles` | ⚠️ 写操作 Create DoS protection profile |
+| `update_dos_protection_profile` | PUT | `/config/security/v1/dos-protection-profiles/{id}` | ⚠️ 写操作 Update DoS protection profile |
+| `delete_dos_protection_profile` | DELETE | `/config/security/v1/dos-protection-profiles/{id}` | ⚠️ 写操作 Delete DoS protection profile |
+
+#### Security Profile Groups (3 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `create_security_profile_group` | POST | `/config/security/v1/profile-groups` | ⚠️ 写操作 Create security profile group |
+| `update_security_profile_group` | PUT | `/config/security/v1/profile-groups/{id}` | ⚠️ 写操作 Update security profile group |
+| `delete_security_profile_group` | DELETE | `/config/security/v1/profile-groups/{id}` | ⚠️ 写操作 Delete security profile group |
+
+#### Decryption Profiles (3 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `create_decryption_profile` | POST | `/config/security/v1/decryption-profiles` | ⚠️ 写操作 Create decryption profile |
+| `update_decryption_profile` | PUT | `/config/security/v1/decryption-profiles/{id}` | ⚠️ 写操作 Update decryption profile |
+| `delete_decryption_profile` | DELETE | `/config/security/v1/decryption-profiles/{id}` | ⚠️ 写操作 Delete decryption profile |
+
+#### Zone Protection Profiles (3 tools)
+| Tool Name | Method | Endpoint | Description |
+|-----------|--------|----------|-------------|
+| `create_zone_protection_profile` | POST | `/config/security/v1/zone-protection-profiles` | ⚠️ 写操作 Create zone protection profile |
+| `update_zone_protection_profile` | PUT | `/config/security/v1/zone-protection-profiles/{id}` | ⚠️ 写操作 Update zone protection profile |
+| `delete_zone_protection_profile` | DELETE | `/config/security/v1/zone-protection-profiles/{id}` | ⚠️ 写操作 Delete zone protection profile |
+
+---
+
+## OpenAPI Source Files
+
+All tools are extracted from the following OpenAPI specifications:
+
+| Domain | Source File | Tools Count |
+|--------|-------------|-------------|
+| **Objects** | `config/sase/objects/objects-june.yaml` | 75 tools |
+| **Security** | `config/sase/security/security-services-R2-2026.yaml` | 53 tools |
+| **Operations** | `config/sase/operations/config-operations-march.yaml` | 8 tools |
+| **IAM** | `iam/ServiceAccounts.yaml`, `iam/Roles.yaml`, `iam/AccessPolicies.yaml` | 12 tools |
+| **Total** | 4 OpenAPI files | **168 tools** |
+
+**Note**: Auth endpoints (`auth/AuthService.yaml`) are NOT exposed as tools. OAuth2 token management is handled internally by `auth.py`.
 
 ## Data Flow Example
 
